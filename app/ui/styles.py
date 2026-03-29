@@ -5,6 +5,57 @@ def inject_global_styles() -> None:
     st.markdown(
         """
         <style>
+        :root {
+            --yl-bg: #fcfbf7;
+            --yl-surface: rgba(255, 252, 245, 0.88);
+            --yl-surface-strong: #f2ead9;
+            --yl-surface-soft: #f8f3e7;
+            --yl-border: rgba(120, 113, 108, 0.22);
+            --yl-border-soft: rgba(120, 113, 108, 0.16);
+            --yl-text: #1f2937;
+            --yl-text-soft: #6b7280;
+            --yl-text-muted: #7c6f64;
+            --yl-pill-bg: #efe7d4;
+            --yl-pill-text: #3f3a33;
+            --yl-score-track: rgba(191, 167, 108, 0.18);
+            --yl-score-fill-start: #b68b3a;
+            --yl-score-fill-end: #d7b162;
+            --yl-input-bg: #f8f3e7;
+            --yl-input-text: #1f2937;
+            --yl-input-border: rgba(120, 113, 108, 0.24);
+            --yl-subtle-bg: rgba(255, 252, 245, 0.78);
+        }
+
+        :root[data-yearlens-theme="dark"] {
+            --yl-bg: #111827;
+            --yl-surface: rgba(24, 33, 49, 0.9);
+            --yl-surface-strong: #1f2937;
+            --yl-surface-soft: #162033;
+            --yl-border: rgba(148, 163, 184, 0.28);
+            --yl-border-soft: rgba(148, 163, 184, 0.18);
+            --yl-text: #edf2f7;
+            --yl-text-soft: #cbd5e1;
+            --yl-text-muted: #94a3b8;
+            --yl-pill-bg: #243247;
+            --yl-pill-text: #e5edf8;
+            --yl-score-track: rgba(148, 163, 184, 0.18);
+            --yl-score-fill-start: #f0c56a;
+            --yl-score-fill-end: #d6a540;
+            --yl-input-bg: #162033;
+            --yl-input-text: #edf2f7;
+            --yl-input-border: rgba(148, 163, 184, 0.26);
+            --yl-subtle-bg: rgba(20, 28, 42, 0.84);
+        }
+
+        html, body, [data-testid="stAppViewContainer"], .stApp, [data-testid="stHeader"] {
+            background: var(--yl-bg) !important;
+            color: var(--yl-text) !important;
+        }
+
+        [data-testid="stToolbar"] {
+            background: transparent !important;
+        }
+
         .block-container {
             max-width: 760px;
             padding-top: 0.75rem;
@@ -22,24 +73,64 @@ def inject_global_styles() -> None:
             line-height: 0.95;
             letter-spacing: -0.04em;
             margin: 0 0 0.55rem 0;
-            color: #1f2937;
+            color: var(--yl-text);
         }
 
         .yearlens-hero p {
             margin: 0;
             font-size: 1rem;
             line-height: 1.55;
-            color: #6b7280;
+            color: var(--yl-text-soft);
             max-width: 44rem;
+        }
+
+        .yearlens-theme-card {
+            border: 1px solid var(--yl-border);
+            border-radius: 16px;
+            background: var(--yl-surface);
+            padding: 0.7rem 0.8rem 0.35rem 0.8rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .yearlens-theme-card [data-testid="stWidgetLabel"] p,
+        .yearlens-theme-card label,
+        .yearlens-theme-card p {
+            color: var(--yl-text) !important;
+        }
+
+        .yearlens-theme-card div[role="radiogroup"] label,
+        .yearlens-theme-card button {
+            color: var(--yl-text) !important;
+        }
+
+        .yearlens-theme-card div[data-baseweb="tag"] {
+            background: var(--yl-pill-bg) !important;
+            border-color: var(--yl-border-soft) !important;
+            color: var(--yl-pill-text) !important;
         }
 
         div[data-testid="stForm"] {
             padding: 0.8rem 0.9rem 0.9rem 0.9rem;
+            border: 1px solid var(--yl-border);
+            border-radius: 16px;
+            background: var(--yl-surface);
         }
 
         div[data-testid="stForm"] label,
-        div[data-testid="stExpander"] label {
+        div[data-testid="stExpander"] label,
+        div[data-testid="stRadio"] label,
+        div[data-testid="stSelectbox"] label,
+        div[data-testid="stDateInput"] label,
+        div[data-testid="stTextInput"] label {
             font-size: 0.96rem;
+            color: var(--yl-text) !important;
+        }
+
+        div[data-testid="stCaptionContainer"],
+        div[data-testid="stMarkdownContainer"] p,
+        div[data-testid="stMarkdownContainer"] li,
+        div[data-testid="stText"] {
+            color: var(--yl-text) !important;
         }
 
         div[data-testid="stCaptionContainer"] {
@@ -49,31 +140,69 @@ def inject_global_styles() -> None:
         div[data-baseweb="input"] > div,
         div[data-baseweb="select"] > div,
         div[data-testid="stDateInput"] > div,
-        div[data-testid="stNumberInput"] > div {
+        div[data-testid="stNumberInput"] > div,
+        div[data-testid="stTextInputRootElement"] > div {
             min-height: 2.85rem;
+            background: var(--yl-input-bg) !important;
+            border-color: var(--yl-input-border) !important;
+            color: var(--yl-input-text) !important;
         }
 
         div[data-baseweb="input"] input,
         div[data-baseweb="select"] *,
         div[data-testid="stDateInput"] input,
-        div[data-testid="stNumberInput"] input {
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stTextInputRootElement"] input {
             font-size: 0.98rem;
+            color: var(--yl-input-text) !important;
+            background: transparent !important;
+            caret-color: var(--yl-input-text) !important;
+        }
+
+        div[data-baseweb="input"] input::placeholder,
+        div[data-testid="stTextInputRootElement"] input::placeholder {
+            color: var(--yl-text-muted) !important;
         }
 
         div[data-testid="stNumberInput"] button {
             min-width: 2rem;
             min-height: 2rem;
+            color: var(--yl-text) !important;
         }
 
-        div[data-testid="stFormSubmitButton"] button {
+        div[data-testid="stFormSubmitButton"] button,
+        div[data-testid="stButton"] button {
             min-height: 2.9rem;
             font-size: 1rem;
+            background: var(--yl-surface-strong) !important;
+            color: var(--yl-text) !important;
+            border: 1px solid var(--yl-border) !important;
+        }
+
+        div[data-testid="stRadio"] div[role="radiogroup"] label,
+        div[data-testid="stSegmentedControl"] button {
+            color: var(--yl-text) !important;
+        }
+
+        div[data-testid="stSegmentedControl"] button {
+            background: var(--yl-surface-soft) !important;
+            border-color: var(--yl-border) !important;
+        }
+
+        div[data-testid="stSegmentedControl"] button[aria-pressed="true"] {
+            background: var(--yl-pill-bg) !important;
+            color: var(--yl-pill-text) !important;
+        }
+
+        details, summary, div[data-testid="stExpander"] {
+            background: transparent !important;
+            color: var(--yl-text) !important;
         }
 
         .yearlens-card {
-            border: 1px solid rgba(120, 113, 108, 0.22);
+            border: 1px solid var(--yl-border);
             border-radius: 16px;
-            background: rgba(255, 252, 245, 0.88);
+            background: var(--yl-surface);
             padding: 0.8rem 0.9rem;
             margin-bottom: 0.7rem;
         }
@@ -82,14 +211,14 @@ def inject_global_styles() -> None:
             font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            color: #7c6f64;
+            color: var(--yl-text-muted);
             margin-bottom: 0.25rem;
         }
 
         .yearlens-value {
             font-size: 1.05rem;
             font-weight: 600;
-            color: #1f2937;
+            color: var(--yl-text);
             line-height: 1.35;
         }
 
@@ -104,17 +233,17 @@ def inject_global_styles() -> None:
             display: inline-block;
             border-radius: 999px;
             padding: 0.32rem 0.7rem;
-            background: #efe7d4;
-            color: #3f3a33;
+            background: var(--yl-pill-bg);
+            color: var(--yl-pill-text);
             font-size: 0.92rem;
             line-height: 1.2;
-            border: 1px solid rgba(120, 113, 108, 0.16);
+            border: 1px solid var(--yl-border-soft);
         }
 
         .yearlens-section-title {
             font-size: 0.95rem;
             font-weight: 700;
-            color: #1f2937;
+            color: var(--yl-text);
             margin-top: 0.32rem;
             margin-bottom: 0.08rem;
             line-height: 1.2;
@@ -128,12 +257,13 @@ def inject_global_styles() -> None:
         .yearlens-list li {
             margin: 0.08rem 0;
             line-height: 1.35;
+            color: var(--yl-text);
         }
 
         .yearlens-period-headline {
             font-size: 1.1rem;
             font-weight: 700;
-            color: #1f2937;
+            color: var(--yl-text);
             margin: 0.1rem 0 0.45rem 0;
             line-height: 1.25;
         }
@@ -164,14 +294,14 @@ def inject_global_styles() -> None:
             justify-content: space-between;
             gap: 0.6rem;
             font-size: 0.92rem;
-            color: #374151;
+            color: var(--yl-text-soft);
         }
 
         .yearlens-score-bar {
             width: 100%;
             height: 0.46rem;
             border-radius: 999px;
-            background: rgba(191, 167, 108, 0.18);
+            background: var(--yl-score-track);
             overflow: hidden;
         }
 
@@ -179,13 +309,13 @@ def inject_global_styles() -> None:
             display: block;
             height: 100%;
             border-radius: 999px;
-            background: linear-gradient(90deg, #b68b3a 0%, #d7b162 100%);
+            background: linear-gradient(90deg, var(--yl-score-fill-start) 0%, var(--yl-score-fill-end) 100%);
         }
 
         .yearlens-explainer {
-            border: 1px solid rgba(120, 113, 108, 0.16);
+            border: 1px solid var(--yl-border-soft);
             border-radius: 12px;
-            background: rgba(255, 252, 245, 0.78);
+            background: var(--yl-subtle-bg);
             padding: 0.65rem 0.75rem;
             margin: 0.2rem 0 0.15rem 0;
         }
@@ -193,14 +323,14 @@ def inject_global_styles() -> None:
         .yearlens-explainer-title {
             font-size: 0.93rem;
             font-weight: 700;
-            color: #1f2937;
+            color: var(--yl-text);
             margin-bottom: 0.18rem;
         }
 
         .yearlens-explainer-summary {
             font-size: 0.94rem;
             line-height: 1.45;
-            color: #4b5563;
+            color: var(--yl-text-soft);
         }
 
         @media (max-width: 640px) {

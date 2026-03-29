@@ -33,6 +33,7 @@ Outputs:
 - concise mode for scanning
 - detailed mode for explanation
 - trust notes about data quality and backend assumptions
+- app-level `System / Light / Dark` theme toggle
 
 ## Current Build Status
 
@@ -49,6 +50,7 @@ Working now:
 - plain-English period headlines and setup-first explanations for signs, houses, and transit events
 - confidence breakdown based on event strength, signal agreement, and data quality
 - mobile-aware and tighter desktop UI
+- per-browser theme toggle with system-mode default
 - optional manual latitude, longitude, and timezone overrides
 - no report-file or database storage in the normal app flow
 
