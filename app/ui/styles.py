@@ -6,29 +6,8 @@ def inject_global_styles() -> None:
         """
         <style>
         :root {
-            --yl-bg: #fcfbf7;
-            --yl-surface: rgba(255, 252, 245, 0.88);
-            --yl-surface-strong: #f2ead9;
-            --yl-surface-soft: #f8f3e7;
-            --yl-border: rgba(120, 113, 108, 0.22);
-            --yl-border-soft: rgba(120, 113, 108, 0.16);
-            --yl-text: #1f2937;
-            --yl-text-soft: #6b7280;
-            --yl-text-muted: #7c6f64;
-            --yl-pill-bg: #efe7d4;
-            --yl-pill-text: #3f3a33;
-            --yl-score-track: rgba(191, 167, 108, 0.18);
-            --yl-score-fill-start: #b68b3a;
-            --yl-score-fill-end: #d7b162;
-            --yl-input-bg: #f8f3e7;
-            --yl-input-text: #1f2937;
-            --yl-input-border: rgba(120, 113, 108, 0.24);
-            --yl-subtle-bg: rgba(255, 252, 245, 0.78);
-        }
-
-        :root[data-yearlens-theme="dark"] {
             --yl-bg: #111827;
-            --yl-surface: rgba(24, 33, 49, 0.9);
+            --yl-surface: rgba(24, 33, 49, 0.92);
             --yl-surface-strong: #1f2937;
             --yl-surface-soft: #162033;
             --yl-border: rgba(148, 163, 184, 0.28);
@@ -38,9 +17,6 @@ def inject_global_styles() -> None:
             --yl-text-muted: #94a3b8;
             --yl-pill-bg: #243247;
             --yl-pill-text: #e5edf8;
-            --yl-score-track: rgba(148, 163, 184, 0.18);
-            --yl-score-fill-start: #f0c56a;
-            --yl-score-fill-end: #d6a540;
             --yl-input-bg: #162033;
             --yl-input-text: #edf2f7;
             --yl-input-border: rgba(148, 163, 184, 0.26);
@@ -82,31 +58,6 @@ def inject_global_styles() -> None:
             line-height: 1.55;
             color: var(--yl-text-soft);
             max-width: 44rem;
-        }
-
-        .yearlens-theme-card {
-            border: 1px solid var(--yl-border);
-            border-radius: 16px;
-            background: var(--yl-surface);
-            padding: 0.7rem 0.8rem 0.35rem 0.8rem;
-            margin-bottom: 0.7rem;
-        }
-
-        .yearlens-theme-card [data-testid="stWidgetLabel"] p,
-        .yearlens-theme-card label,
-        .yearlens-theme-card p {
-            color: var(--yl-text) !important;
-        }
-
-        .yearlens-theme-card div[role="radiogroup"] label,
-        .yearlens-theme-card button {
-            color: var(--yl-text) !important;
-        }
-
-        .yearlens-theme-card div[data-baseweb="tag"] {
-            background: var(--yl-pill-bg) !important;
-            border-color: var(--yl-border-soft) !important;
-            color: var(--yl-pill-text) !important;
         }
 
         div[data-testid="stForm"] {
@@ -179,19 +130,8 @@ def inject_global_styles() -> None:
             border: 1px solid var(--yl-border) !important;
         }
 
-        div[data-testid="stRadio"] div[role="radiogroup"] label,
-        div[data-testid="stSegmentedControl"] button {
+        div[data-testid="stRadio"] div[role="radiogroup"] label {
             color: var(--yl-text) !important;
-        }
-
-        div[data-testid="stSegmentedControl"] button {
-            background: var(--yl-surface-soft) !important;
-            border-color: var(--yl-border) !important;
-        }
-
-        div[data-testid="stSegmentedControl"] button[aria-pressed="true"] {
-            background: var(--yl-pill-bg) !important;
-            color: var(--yl-pill-text) !important;
         }
 
         details, summary, div[data-testid="stExpander"] {
@@ -278,38 +218,15 @@ def inject_global_styles() -> None:
             min-width: 0;
         }
 
-        .yearlens-score-list {
-            display: grid;
-            gap: 0.5rem;
-            margin: 0.18rem 0 0.35rem 0;
-        }
-
-        .yearlens-score-row {
-            display: grid;
-            gap: 0.18rem;
-        }
-
-        .yearlens-score-meta {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.6rem;
-            font-size: 0.92rem;
+        .yearlens-score-label,
+        .yearlens-score-value {
+            font-size: 0.94rem;
             color: var(--yl-text-soft);
+            margin: 0.12rem 0 0.12rem 0;
         }
 
-        .yearlens-score-bar {
-            width: 100%;
-            height: 0.46rem;
-            border-radius: 999px;
-            background: var(--yl-score-track);
-            overflow: hidden;
-        }
-
-        .yearlens-score-bar span {
-            display: block;
-            height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, var(--yl-score-fill-start) 0%, var(--yl-score-fill-end) 100%);
+        .yearlens-score-value {
+            text-align: right;
         }
 
         .yearlens-explainer {

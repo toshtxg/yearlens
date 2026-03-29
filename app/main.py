@@ -18,7 +18,6 @@ from app.providers.template_narrative import TemplateNarrativeProvider
 from app.ui.form import render_input_form
 from app.ui.report import render_report_actions, render_year_overview
 from app.ui.styles import inject_global_styles
-from app.ui.theme import get_theme_preference, inject_theme_controller, render_theme_toggle
 from app.ui.timeline import render_period_timeline
 
 
@@ -48,25 +47,16 @@ def generate_report(user_input: UserInput) -> dict:
 
 def main() -> None:
     st.set_page_config(page_title="YearLens", page_icon="🔭", layout="wide")
-    theme_preference = get_theme_preference()
-    inject_theme_controller(theme_preference)
     inject_global_styles()
-    hero_col, theme_col = st.columns([4, 1.3], gap="small")
-    with hero_col:
-        st.markdown(
-            """
-            <div class="yearlens-hero">
-                <h1>YearLens</h1>
-                <p>YearLens turns your birth details into a structured year reading with clearer windows, plain-language guidance, and a softer explanation of what the astrology is actually pointing to.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with theme_col:
-        st.markdown("<div class='yearlens-kicker'>Theme</div>", unsafe_allow_html=True)
-        theme_preference = render_theme_toggle()
-        st.caption("Default is System.")
-    inject_theme_controller(theme_preference)
+    st.markdown(
+        """
+        <div class="yearlens-hero">
+            <h1>YearLens</h1>
+            <p>YearLens turns your birth details into a structured year reading with clearer windows, plain-language guidance, and a softer explanation of what the astrology is actually pointing to.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown(
         """
         <div class="yearlens-card">

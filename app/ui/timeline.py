@@ -21,19 +21,17 @@ def _render_section(title: str, items: list[str]) -> None:
 
 
 def _render_domain_scores(period: dict) -> None:
-    rows = []
     for domain in period["top_domains"]:
         score = period["domains"][domain]
-        width = max(12, min(100, score * 10))
-        rows.append(
-            (
-                '<div class="yearlens-score-row">'
-                f'<div class="yearlens-score-meta"><span>{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}</span><span>{score}/10</span></div>'
-                f'<div class="yearlens-score-bar"><span style="width:{width}%"></span></div>'
-                "</div>"
+        label_col, value_col = st.columns([6, 1])
+        with label_col:
+            st.markdown(
+                f"<div class='yearlens-score-label'>{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}</div>",
+                unsafe_allow_html=True,
             )
-        )
-    st.html(f"<div class='yearlens-score-list'>{''.join(rows)}</div>")
+        with value_col:
+            st.markdown(f"<div class='yearlens-score-value'>{score}/10</div>", unsafe_allow_html=True)
+        st.progress(score / 10)
 
 
 def _render_explanation_blocks(period: dict) -> None:

@@ -30,7 +30,6 @@ Last updated: 2026-03-29
 - [x] Added confidence breakdown using event strength, signal agreement, and data quality
 - [x] Added trust/data-handling notes to the report and header
 - [x] Added tests for narrative shape and anchor regression behavior
-- [x] Added app-level `System / Light / Dark` theme controls
 
 ## In Progress
 
