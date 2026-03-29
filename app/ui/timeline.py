@@ -19,11 +19,15 @@ def _render_list(items: list[str], list_class: str = "yearlens-list") -> None:
 
 
 def _render_signal_grid(signals: list[dict]) -> None:
+    _render_signal_grid_with_limit(signals, 3)
+
+
+def _render_signal_grid_with_limit(signals: list[dict], limit: int) -> None:
     if not signals:
         return
 
     st.markdown("<div class='yearlens-section-title'>What stands out here</div>", unsafe_allow_html=True)
-    trimmed_signals = signals[:3]
+    trimmed_signals = signals[:limit]
     for row_start in range(0, len(trimmed_signals), 2):
         row_signals = trimmed_signals[row_start:row_start + 2]
         columns = st.columns(len(row_signals), gap="small")
@@ -76,6 +80,11 @@ def _render_domain_scores(period: dict) -> None:
     st.markdown(f"<div class='yearlens-score-grid'>{''.join(cards)}</div>", unsafe_allow_html=True)
 
 
+def _render_focus_pills(period: dict) -> None:
+    items = [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}" for domain in period["top_domains"]]
+    _render_pill_row(items)
+
+
 def _render_takeaway_card(advice: list[str]) -> None:
     if not advice:
         return
@@ -124,21 +133,22 @@ def _clarity_label(confidence: float) -> str:
 
 
 def render_period_timeline(periods: list[dict], mode: str) -> None:
-    st.caption("Read each period like a weather shift: start with the summary, then use the focus areas and cautions to decide how to move through it.")
+    st.caption("Read each period like a weather shift: headline first, then the focus areas and cautions underneath.")
 
     for index, period in enumerate(periods):
         tone_meta = TONE_UI[period["tone"]]
         primary_domain = period["top_domains"][0]
-        header = f"{tone_meta['emoji']} {_pretty_date(period['start_date'])} to {_pretty_date(period['end_date'])} · {period['headline']}"
+        header = f"{tone_meta['emoji']} {period['headline']}"
 
         with st.expander(header, expanded=(mode == "concise" and index == 0)):
-            _render_pill_row(
-                [
-                    tone_meta["label"],
-                    f"Main focus: {DOMAIN_LABELS[primary_domain]}",
-                    _clarity_label(period["confidence"]),
-                ]
-            )
+            header_pills = [
+                _pretty_date_range(period["start_date"], period["end_date"]),
+                tone_meta["label"],
+                f"Main focus: {DOMAIN_LABELS[primary_domain]}",
+            ]
+            if mode == "detailed":
+                header_pills.append(_clarity_label(period["confidence"]))
+            _render_pill_row(header_pills)
 
             st.markdown(
                 (
@@ -152,10 +162,14 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
                 unsafe_allow_html=True,
             )
 
-            _render_signal_grid(period["surfaced_signals"])
+            _render_signal_grid_with_limit(period["surfaced_signals"], 2 if mode == "concise" else 3)
             _render_action_cards(period)
-            _render_domain_scores(period)
             _render_takeaway_card(period["advice"])
+            if mode == "concise":
+                st.markdown("<div class='yearlens-section-title'>Main Focus Areas</div>", unsafe_allow_html=True)
+                _render_focus_pills(period)
+            else:
+                _render_domain_scores(period)
 
             if mode == "detailed":
                 with st.expander("Why this period was read this way", expanded=False):
@@ -164,3 +178,13 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
 
 def _pretty_date(value: str) -> str:
     return date.fromisoformat(value).strftime("%b %d")
+
+
+def _pretty_date_range(start_value: str, end_value: str) -> str:
+    start = date.fromisoformat(start_value)
+    end = date.fromisoformat(end_value)
+    if start.year == end.year:
+        if start.month == end.month:
+            return f"{start.strftime('%b')} {start.day} to {end.day}, {start.year}"
+        return f"{start.strftime('%b')} {start.day} to {end.strftime('%b')} {end.day}, {start.year}"
+    return f"{start.strftime('%b')} {start.day}, {start.year} to {end.strftime('%b')} {end.day}, {end.year}"

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from html import escape
 
 import streamlit as st
@@ -10,8 +11,11 @@ def _render_pill_row(items: list[str]) -> None:
     st.markdown(f"<div class='yearlens-pill-row'>{pills}</div>", unsafe_allow_html=True)
 
 
-def _render_list_card(title: str, items: list[str], card_class: str = "") -> None:
-    list_items = "".join(f"<li>{escape(item)}</li>" for item in items)
+def _render_list_card(title: str, items: list[str], card_class: str = "", card_kind: str = "plain") -> None:
+    if card_kind == "period":
+        list_items = "".join(_render_period_item(item) for item in items)
+    else:
+        list_items = "".join(f"<li>{escape(item)}</li>" for item in items)
     classes = "yearlens-mini-card"
     if card_class:
         classes += f" {card_class}"
@@ -27,6 +31,35 @@ def _year_signal_label(confidence: float) -> str:
     if confidence >= 0.68:
         return "Mixed but usable signal"
     return "Gentler, lower-contrast signal"
+
+
+def _render_period_item(item: str) -> str:
+    if " · " not in item or " to " not in item:
+        return f"<li>{escape(item)}</li>"
+
+    range_part, headline = item.split(" · ", 1)
+    start_text, end_text = range_part.split(" to ", 1)
+    try:
+        start_date = date.fromisoformat(start_text)
+        end_date = date.fromisoformat(end_text)
+    except ValueError:
+        return f"<li>{escape(item)}</li>"
+
+    date_label = _format_date_range(start_date, end_date)
+    return (
+        "<li class='yearlens-mini-period-item'>"
+        f"<div class='yearlens-mini-period-date'>{escape(date_label)}</div>"
+        f"<div class='yearlens-mini-period-copy'>{escape(headline)}</div>"
+        "</li>"
+    )
+
+
+def _format_date_range(start: date, end: date) -> str:
+    if start.year == end.year:
+        if start.month == end.month:
+            return f"{start.strftime('%b')} {start.day} to {end.day}, {start.year}"
+        return f"{start.strftime('%b')} {start.day} to {end.strftime('%b')} {end.day}, {start.year}"
+    return f"{start.strftime('%b')} {start.day}, {start.year} to {end.strftime('%b')} {end.day}, {end.year}"
 
 
 def render_year_overview(overview: dict, metadata: dict) -> None:
@@ -57,9 +90,9 @@ def render_year_overview(overview: dict, metadata: dict) -> None:
     with col1:
         _render_list_card("Themes That Keep Returning", overview["top_themes"], "yearlens-mini-card-theme")
     with col2:
-        _render_list_card("Windows To Lean Into", overview["top_opportunity_periods"], "yearlens-mini-card-up")
+        _render_list_card("Windows To Lean Into", overview["top_opportunity_periods"], "yearlens-mini-card-up", "period")
     with col3:
-        _render_list_card("Windows To Pace Carefully", overview["top_caution_periods"], "yearlens-mini-card-warn")
+        _render_list_card("Windows To Pace Carefully", overview["top_caution_periods"], "yearlens-mini-card-warn", "period")
 
 
 def render_report_actions(report: dict) -> None:

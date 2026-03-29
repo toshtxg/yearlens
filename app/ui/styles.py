@@ -265,8 +265,9 @@ def inject_global_styles() -> None:
 
         div[data-testid="stExpander"] summary p {
             color: var(--yl-text) !important;
-            font-size: 1.02rem !important;
+            font-size: 0.98rem !important;
             font-weight: 700 !important;
+            line-height: 1.35 !important;
         }
 
         div[data-testid="stExpander"] details[open] summary {
@@ -415,6 +416,28 @@ def inject_global_styles() -> None:
             margin-bottom: 0.35rem;
         }
 
+        .yearlens-mini-period-item {
+            list-style: none;
+            margin-left: -0.2rem;
+            padding: 0.12rem 0 0.38rem 0;
+        }
+
+        .yearlens-mini-period-date {
+            color: var(--yl-text-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.14rem;
+            font-weight: 700;
+        }
+
+        .yearlens-mini-period-copy {
+            color: var(--yl-text);
+            font-size: 0.95rem;
+            line-height: 1.45;
+            font-weight: 700;
+        }
+
         .yearlens-period-headline {
             font-size: 1.22rem;
             font-family: "Space Grotesk", sans-serif;
@@ -484,6 +507,16 @@ def inject_global_styles() -> None:
             padding: 0.62rem 0.8rem 0.72rem 0.8rem;
             min-height: 100%;
             background: rgba(17, 26, 43, 0.88);
+        }
+
+        .yearlens-action-card .yearlens-compact-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .yearlens-action-card .yearlens-compact-list li {
+            margin: 0.28rem 0;
+            line-height: 1.5;
         }
 
         .yearlens-action-card-up {
