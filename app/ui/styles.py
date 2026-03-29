@@ -236,6 +236,11 @@ def inject_global_styles() -> None:
             background: linear-gradient(135deg, var(--yl-accent-soft), var(--yl-accent)) !important;
             box-shadow: 0 16px 30px rgba(215, 164, 65, 0.22);
         }
+        div[data-testid="stFormSubmitButton"] button p,
+        div[data-testid="stButton"] button p,
+        div[data-testid="stLinkButton"] a p {
+            color: #0f172a !important;
+        }
 
         div[data-testid="stSegmentedControl"] button {
             background: rgba(31, 45, 73, 0.7) !important;
