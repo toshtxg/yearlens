@@ -24,14 +24,20 @@ Last updated: 2026-03-29
 - [x] Added intro, user-guide, and disclaimer content in the app header
 - [x] Added softer period guidance around decisions, politics, relationships, money, and health
 - [x] Added dedicated documentation for model logic and technical implementation
+- [x] Removed the unused `Download JSON` report action
+- [x] Added weighted dominant-driver selection for each period
+- [x] Added plain-English explanation scaffolding before interpretation
+- [x] Added confidence breakdown using event strength, signal agreement, and data quality
+- [x] Added trust/data-handling notes to the report and header
+- [x] Added tests for narrative shape and anchor regression behavior
 
 ## In Progress
 
-- [ ] Deepen meaning rules beyond the current starter mappings
+- [ ] Calibrate the new meaning rules against more real reading examples
 - [ ] Refine change-point weighting so segment boundaries feel more practitioner-like
 - [ ] Tighten period segmentation further using driver intensity rather than only date spacing
 - [ ] Expand rules for planets, houses, nodes, and transit modifiers
-- [ ] Improve confidence scoring beyond the current starter heuristics
+- [ ] Tune thresholds for when signals should surface or stay hidden
 
 ## Later
 
@@ -40,6 +46,7 @@ Last updated: 2026-03-29
 - [ ] Add optional LLM narrative provider behind a feature flag
 - [ ] Add OCR and note-ingestion only if that becomes a real requirement
 - [ ] Add historical calibration only after the deterministic base is trusted
+- [ ] Add persistence UI only if users actually need saved reports
 
 ## Open Decisions
 

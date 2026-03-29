@@ -26,7 +26,7 @@ def render_input_form() -> dict | None:
         with time_col_2:
             birth_minute = int(st.selectbox("Minute", options=list(range(60)), index=0))
         birth_time = time(birth_hour, birth_minute)
-        st.caption("Enter birth time as exact hour and minute when known.")
+        st.caption("Enter birth time as exactly as you know it. House-based reading quality depends on this.")
 
         birth_location = st.text_input("Birth location", value="Singapore")
         name = st.text_input("Display name", value="", placeholder="Optional")
@@ -47,7 +47,7 @@ def render_input_form() -> dict | None:
             birth_latitude = st.text_input("Latitude override", value="", placeholder="e.g. 1.3521")
             birth_longitude = st.text_input("Longitude override", value="", placeholder="e.g. 103.8198")
             timezone_id = st.text_input("Timezone override", value="", placeholder="e.g. Asia/Singapore")
-            st.caption("Optional. Use manual coordinates/timezone to bypass geocoding when needed.")
+            st.caption("Optional. Use manual coordinates/timezone to bypass geocoding, improve repeatability, and avoid sending the place name to the geocoder.")
 
         submitted = st.form_submit_button("Generate Reading", use_container_width=True)
 

@@ -86,10 +86,12 @@ The app scores six broad life domains for each period:
 
 The current scoring model uses:
 
-- dominant transit driver for the period
-- the activated house
-- the current tone of the period
+- weighted transit drivers for the period
+- event type intensity differences between ingresses, stations, and eclipses
+- repeating house emphasis inside the same window
 - house-to-domain mappings
+- planet-to-domain boosts
+- current period tone
 
 This is still a heuristic layer and should be treated as tunable.
 
@@ -116,10 +118,12 @@ YearLens now incorporates the kinds of concerns a practitioner might naturally h
 Current signal categories:
 
 - decision timing
-- politics / mixed motives
+- people / politics
 - relationships
 - money
 - health
+- travel / movement
+- work / responsibility
 
 Important design choice:
 
@@ -135,7 +139,21 @@ Examples of the intended tone:
 - `Keep money decisions measured`
 - `Mind energy, stress, and health`
 
-## 7. Narrative Layer
+## 7. Dominant Drivers
+
+YearLens now picks 1-2 dominant drivers per period instead of blending every change point equally.
+
+The weighting currently considers:
+
+- raw event intensity
+- event type
+- planet
+- house sensitivity
+- whether multiple drivers repeat the same house emphasis
+
+This is meant to reduce generic period output and make each window feel more distinct.
+
+## 8. Narrative Layer
 
 Implemented in [template_narrative.py](/Users/toshgoh/projects/yearlens/app/providers/template_narrative.py) and [narrative_engine.py](/Users/toshgoh/projects/yearlens/app/core/narrative_engine.py).
 
@@ -152,7 +170,36 @@ Rule:
 - LLMs should never become the source of truth for chart math, event dates, or raw period scoring
 - LLM use, if added, should stay downstream of the structured deterministic output
 
-## 8. Softness vs Certainty
+The current deterministic narrative shape is:
+
+- short headline
+- plain-English summary
+- use this window for
+- be more careful with
+- detailed explanation blocks for the event, sign, and house
+
+Important UX decision:
+
+- the app now translates the symbolism before jumping to interpretation
+- raw phrases like `Lunar eclipse in Leo / House 8` are no longer meant to stand alone without explanation
+
+## 9. Confidence Logic
+
+Confidence is still heuristic, but it is no longer a flat single-factor score.
+
+The current confidence model blends:
+
+- event strength
+- signal agreement
+- data quality
+
+Data quality currently reflects:
+
+- whether location was manually provided or geocoded
+- whether manual timezone was supplied
+- whether Swiss ephemeris files were available or Moshier fallback was used
+
+## 10. Softness vs Certainty
 
 This is an explicit model design constraint.
 
@@ -169,12 +216,11 @@ The app should:
 - support reflection and decision quality
 - leave room for user judgment
 
-## 9. Known Model Limits
+## 11. Known Model Limits
 
-- the interpretation heuristics are still early and need calibration
-- confidence scoring is still simplistic
+- the interpretation heuristics still need calibration against real practitioner examples
+- confidence scoring is still heuristic and not historically validated
 - no birth time uncertainty model yet
 - no OCR note ingestion yet
 - no historical calibration yet
 - no practitioner-specific custom ruleset yet
-

@@ -31,9 +31,9 @@ Why this shape:
 - [form.py](/Users/toshgoh/projects/yearlens/app/ui/form.py)
   User input form and advanced overrides.
 - [report.py](/Users/toshgoh/projects/yearlens/app/ui/report.py)
-  Year overview rendering.
+  Year overview rendering plus trust/data-handling cues.
 - [timeline.py](/Users/toshgoh/projects/yearlens/app/ui/timeline.py)
-  Period timeline rendering.
+  Period timeline rendering with plain-English summaries, score bars, and explanation blocks.
 - [styles.py](/Users/toshgoh/projects/yearlens/app/ui/styles.py)
   Global UI styling and responsive layout tuning.
 
@@ -48,9 +48,9 @@ Why this shape:
 - [period_engine.py](/Users/toshgoh/projects/yearlens/app/core/period_engine.py)
   Boundary merging, splitting, and segment compression.
 - [meaning_engine.py](/Users/toshgoh/projects/yearlens/app/core/meaning_engine.py)
-  Domain scoring, tone assignment, period guidance.
+  Weighted driver selection, domain scoring, signals, explanations, and confidence breakdown.
 - [narrative_engine.py](/Users/toshgoh/projects/yearlens/app/core/narrative_engine.py)
-  Concise/detailed narrative attachment and overview generation.
+  Structured narrative attachment and overview generation.
 - [config.py](/Users/toshgoh/projects/yearlens/app/core/config.py)
   Constants, mappings, UI labels, and defaults.
 
@@ -70,6 +70,12 @@ Why this shape:
 - [schema.sql](/Users/toshgoh/projects/yearlens/sql/schema.sql)
   Starter schema for future persistence.
 
+Important current-state note:
+
+- the live app flow does not call the storage adapters
+- reports are kept in the current Streamlit session
+- no database or report-file write happens during normal use
+
 ## Request Flow
 
 1. Streamlit form collects input.
@@ -77,8 +83,8 @@ Why this shape:
 3. `location_service` resolves location context.
 4. `astro_engine` computes natal chart and yearly change points.
 5. `period_engine` converts event dates into readable periods.
-6. `meaning_engine` scores domains and creates soft guidance signals.
-7. `template_narrative` converts structured period data into concise and detailed text.
+6. `meaning_engine` selects dominant drivers, scores domains, creates soft guidance signals, and builds explanation blocks plus confidence breakdowns.
+7. `template_narrative` converts structured period data into headline and summary copy.
 8. UI renders overview plus timeline.
 
 ## Ephemeris Behavior
@@ -103,6 +109,11 @@ There are two supported paths:
 2. bypass geocoding by providing manual latitude, longitude, and timezone
 
 The manual path is strongly recommended for repeatable tests and deployment environments where geocoding may be flaky.
+
+Privacy implication:
+
+- if the text location path is used, the place name is sent to the geocoder to resolve coordinates
+- timezone lookup is then performed locally from the resolved coordinates
 
 ## Deployment Notes
 
@@ -137,7 +148,9 @@ Current test coverage focuses on:
 - schema validation
 - astrology engine wiring
 - period generation
-- meaning-engine output shape
+- meaning-engine output shape and signal surfacing
+- narrative output shape
+- year-anchor regression cases
 
 Run:
 
@@ -157,9 +170,8 @@ pytest app/tests
 
 ## Recommended Next Technical Steps
 
-1. deepen the meaning heuristics so they reflect more practitioner-style weighting
-2. improve confidence logic beyond a simple driver-based heuristic
-3. add local save/load UX
+1. calibrate the new meaning heuristics against more real reading examples
+2. refine threshold tuning for when signals should surface or stay hidden
+3. add local save/load UX only if persistence becomes a real user need
 4. add optional Supabase-backed report storage
 5. optionally extract core logic into a service only when the Streamlit monolith becomes too crowded
-

@@ -39,3 +39,32 @@ def test_build_year_change_points_returns_real_events() -> None:
 
     assert change_points
     assert any(point.event_type in {"ingress", "station", "eclipse"} for point in change_points)
+
+
+def test_get_year_window_anchor_regression_cases() -> None:
+    january_birth = UserInput(
+        birth_date=date(1990, 1, 1),
+        birth_time=time(12, 0),
+        birth_location="Singapore",
+        birth_latitude=1.3521,
+        birth_longitude=103.8198,
+        timezone_id="Asia/Singapore",
+        target_year=2026,
+    )
+    july_birth = UserInput(
+        birth_date=date(1990, 7, 10),
+        birth_time=time(12, 0),
+        birth_location="Singapore",
+        birth_latitude=1.3521,
+        birth_longitude=103.8198,
+        timezone_id="Asia/Singapore",
+        target_year=2026,
+    )
+
+    january_window = get_year_window(january_birth)
+    january_calendar = get_year_window(january_birth.model_copy(update={"year_anchor": "calendar"}))
+    july_window = get_year_window(july_birth)
+    july_calendar = get_year_window(july_birth.model_copy(update={"year_anchor": "calendar"}))
+
+    assert january_window == january_calendar
+    assert july_window != july_calendar

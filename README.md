@@ -32,6 +32,7 @@ Outputs:
 - a timeline of meaningful periods
 - concise mode for scanning
 - detailed mode for explanation
+- trust notes about data quality and backend assumptions
 
 ## Current Build Status
 
@@ -44,14 +45,16 @@ Working now:
 - true or mean node handling
 - yearly transit change points from ingresses, retrograde stations, and eclipse dates
 - period segmentation into a readable timeline
-- softer period-by-period guidance for decisions, politics, relationships, money, and health
+- weighted period-by-period guidance for decisions, politics, relationships, money, health, travel, and work
+- plain-English period headlines and setup-first explanations for signs, houses, and transit events
+- confidence breakdown based on event strength, signal agreement, and data quality
 - mobile-aware and tighter desktop UI
 - optional manual latitude, longitude, and timezone overrides
+- no report-file or database storage in the normal app flow
 
 Still evolving:
 
-- richer interpretation heuristics
-- more nuanced confidence scoring
+- further heuristic calibration
 - persistence UX
 - optional LLM narrative provider
 
@@ -109,6 +112,7 @@ Notes:
 
 - the app can run without secrets for local-style usage
 - geocoding may be less reliable in some hosted environments, so manual latitude/longitude/timezone overrides are still useful
+- if you use a place name instead of manual coordinates, that place name is sent to the geocoder to resolve coordinates
 - if you want local Swiss ephemeris files instead of the Moshier fallback, set `SWISSEPH_EPHE_PATH`
 
 ## Environment Variables
@@ -136,5 +140,5 @@ Defined in [.env.example](.env.example):
 - if `SWISSEPH_EPHE_PATH` is not set, the wrapper may use the Moshier fallback backend
 - timezone correctness still matters a lot for birth-time-sensitive outputs
 - the interpretation layer is heuristic and still being tuned
+- the app keeps the generated report in the current session and does not write it to a database or report file by default
 - the app is for reflection and guidance, not certainty or guaranteed prediction
-

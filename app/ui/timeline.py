@@ -14,44 +14,81 @@ def _render_list(items: list[str]) -> None:
 
 
 def _render_section(title: str, items: list[str]) -> None:
+    if not items:
+        return
     st.markdown(f"<div class='yearlens-section-title'>{title}</div>", unsafe_allow_html=True)
     _render_list(items)
 
 
+def _render_domain_scores(period: dict) -> None:
+    rows = []
+    for domain in period["top_domains"]:
+        score = period["domains"][domain]
+        width = max(12, min(100, score * 10))
+        rows.append(
+            f"""
+            <div class="yearlens-score-row">
+                <div class="yearlens-score-meta">
+                    <span>{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}</span>
+                    <span>{score}/10</span>
+                </div>
+                <div class="yearlens-score-bar"><span style="width:{width}%"></span></div>
+            </div>
+            """
+        )
+    st.markdown(f"<div class='yearlens-score-list'>{''.join(rows)}</div>", unsafe_allow_html=True)
+
+
+def _render_explanation_blocks(period: dict) -> None:
+    for block in period["explanation_blocks"]:
+        st.markdown(
+            f"""
+            <div class="yearlens-explainer">
+                <div class="yearlens-explainer-title">{block['title']}</div>
+                <div class="yearlens-explainer-summary">{block['summary']}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        _render_list(block["items"])
+
+
 def render_period_timeline(periods: list[dict], mode: str) -> None:
     st.subheader("Period Timeline")
+    st.caption("Start with the plain-English summary. Open detailed mode when you want to see how the signs, houses, and transit events were translated.")
 
-    for period in periods:
+    for index, period in enumerate(periods):
         tone_meta = TONE_UI[period["tone"]]
-        header = f"{tone_meta['emoji']} {period['start_date']} to {period['end_date']} · {tone_meta['label']}"
-        with st.expander(header, expanded=(mode == "detailed")):
+        header = f"{period['start_date']} to {period['end_date']} · {period['headline']}"
+        with st.expander(header, expanded=(mode == "concise" and index == 0)):
             primary_domain = period["top_domains"][0]
             _render_pill_row(
                 [
                     f"{tone_meta['emoji']} {tone_meta['label']}",
-                    f"Confidence {period['confidence']:.0%}",
+                    f"Confidence {period['confidence']:.0%} · {period['confidence_breakdown']['label']}",
                     f"{DOMAIN_EMOJIS[primary_domain]} {DOMAIN_LABELS[primary_domain]}",
                 ]
             )
-            st.caption(period["driver_summary"])
-            st.caption(f"What this usually feels like: {tone_meta['description']}.")
 
+            st.markdown(f"<div class='yearlens-period-headline'>{period['headline']}</div>", unsafe_allow_html=True)
             st.write(period["concise_text"] if mode == "concise" else period["detailed_text"])
+            _render_section("In This Window", [signal["detail_text"] for signal in period["surfaced_signals"][:4]] or period["period_guidance"])
+            _render_section("Use This Window For", [f"✅ {item}" for item in period["use_for"]])
+            _render_section("Be More Careful With", [f"⚠️ {item}" for item in period["careful_with"]])
 
-            _render_section("In This Window", period["period_guidance"])
-
-            _render_section(
-                "Domain Scores",
-                [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}: {period['domains'][domain]}/10" for domain in period["top_domains"]]
-            )
+            st.markdown("<div class='yearlens-section-title'>Domain Scores</div>", unsafe_allow_html=True)
+            _render_domain_scores(period)
 
             _render_section("Advice", [f"💡 {advice}" for advice in period["advice"]])
 
             if mode == "detailed":
                 _render_section(
-                    "Drivers",
+                    "Confidence Breakdown",
                     [
-                        f"🪐 {driver['planet']} {driver['event_type']} in {driver['sign'] or 'current sign'} / house {driver['house']}: {driver['combined_effect']}"
-                        for driver in period["drivers"]
-                    ]
+                        f"Event strength: {period['confidence_breakdown']['event_strength']:.0%}",
+                        f"Signal agreement: {period['confidence_breakdown']['signal_agreement']:.0%}",
+                        f"Data quality: {period['confidence_breakdown']['data_quality']:.0%}",
+                    ],
                 )
+                st.markdown("<div class='yearlens-section-title'>How This Was Read</div>", unsafe_allow_html=True)
+                _render_explanation_blocks(period)

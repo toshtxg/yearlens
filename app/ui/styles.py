@@ -130,6 +130,79 @@ def inject_global_styles() -> None:
             line-height: 1.35;
         }
 
+        .yearlens-period-headline {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0.1rem 0 0.45rem 0;
+            line-height: 1.25;
+        }
+
+        .yearlens-trust-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.7rem;
+        }
+
+        .yearlens-trust-item {
+            min-width: 0;
+        }
+
+        .yearlens-score-list {
+            display: grid;
+            gap: 0.5rem;
+            margin: 0.18rem 0 0.35rem 0;
+        }
+
+        .yearlens-score-row {
+            display: grid;
+            gap: 0.18rem;
+        }
+
+        .yearlens-score-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.6rem;
+            font-size: 0.92rem;
+            color: #374151;
+        }
+
+        .yearlens-score-bar {
+            width: 100%;
+            height: 0.46rem;
+            border-radius: 999px;
+            background: rgba(191, 167, 108, 0.18);
+            overflow: hidden;
+        }
+
+        .yearlens-score-bar span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #b68b3a 0%, #d7b162 100%);
+        }
+
+        .yearlens-explainer {
+            border: 1px solid rgba(120, 113, 108, 0.16);
+            border-radius: 12px;
+            background: rgba(255, 252, 245, 0.78);
+            padding: 0.65rem 0.75rem;
+            margin: 0.2rem 0 0.15rem 0;
+        }
+
+        .yearlens-explainer-title {
+            font-size: 0.93rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.18rem;
+        }
+
+        .yearlens-explainer-summary {
+            font-size: 0.94rem;
+            line-height: 1.45;
+            color: #4b5563;
+        }
+
         @media (max-width: 640px) {
             .block-container {
                 max-width: 100%;
@@ -152,6 +225,11 @@ def inject_global_styles() -> None:
 
             .yearlens-value {
                 font-size: 1rem;
+            }
+
+            .yearlens-trust-grid {
+                grid-template-columns: 1fr;
+                gap: 0.55rem;
             }
 
             div[data-testid="stForm"] {
