@@ -26,7 +26,7 @@ CAUTION_TONES = {"stressful", "serious", "volatile", "reflective"}
 SUPPORT_TONES = {"constructive", "supportive", "expansive"}
 LEVEL_ORDER = {"low": 0, "medium": 1, "high": 2}
 SIGNAL_ORDER = ["decision_timing", "politics", "relationships", "money", "health", "travel", "work"]
-SIGNAL_PRIORITY = {"decision_timing": 3, "politics": 2, "relationships": 2, "money": 2, "health": 2, "travel": 1, "work": 1}
+SIGNAL_PRIORITY = {"decision_timing": 0, "politics": 2, "relationships": 2, "money": 2, "health": 2, "travel": 1, "work": 1}
 
 
 def build_period_meanings(periods: list[PeriodWindow], natal_chart: dict) -> list[dict]:
@@ -216,29 +216,35 @@ def _build_signals(drivers: list[dict], tone: str, scores: dict[str, int]) -> di
 
 
 def _decision_signal(drivers: list[dict], tone: str) -> dict:
-    caution_driver = any(
-        driver["event_type"] == "eclipse"
-        or (driver["event_type"] == "station" and driver["motion"] == "retrograde")
-        or driver["planet"] in {"Rahu", "Ketu"}
-        or driver["house"] in {8, 12}
-        for driver in drivers
-    )
-    support_driver = any(
-        driver["planet"] in {"Sun", "Jupiter", "Venus"}
-        and driver["event_type"] != "eclipse"
-        and driver["house"] not in {8, 12}
-        for driver in drivers
-    )
+    caution_score = 0.0
+    support_score = 0.0
+
+    for driver in drivers:
+        if driver["event_type"] == "eclipse":
+            caution_score += 2.0
+        if driver["event_type"] == "station" and driver["motion"] == "retrograde":
+            caution_score += 1.2
+        if driver["planet"] in {"Rahu", "Ketu"}:
+            caution_score += 0.9
+        if driver["house"] in {8, 12}:
+            caution_score += 0.8
+        if driver["planet"] in {"Mars", "Saturn"} and driver["house"] in {6, 8, 12}:
+            caution_score += 0.6
+
+        if driver["planet"] in {"Sun", "Jupiter", "Venus"} and driver["event_type"] != "eclipse":
+            support_score += 1.0
+        if driver["house"] in {5, 9, 10, 11} and driver["planet"] in {"Sun", "Jupiter", "Venus", "Mercury"}:
+            support_score += 0.5
 
     status = "mixed"
     short_text = "Decision timing is mixed"
     detail_text = "If something matters, give it a second pass before locking it in."
 
-    if caution_driver or tone in CAUTION_TONES:
+    if caution_score >= 2.2 or (caution_score >= 1.4 and support_score <= 0.5):
         status = "caution"
         short_text = "Use extra care with big decisions"
         detail_text = "This window looks more emotionally charged or less clear for irreversible choices, promises, or rushed commitments."
-    elif support_driver and tone in SUPPORT_TONES:
+    elif support_score >= 1.8 and caution_score <= 0.6 and tone in SUPPORT_TONES:
         status = "good"
         short_text = "A steadier window for key decisions"
         detail_text = "This window looks cleaner for important choices, agreements, and forward movement than the rougher periods around it."
@@ -569,7 +575,7 @@ def _signal_payload(key: str, level: str, short_text: str, detail_text: str) -> 
 
 def _signal_strength(signal: dict) -> int:
     if signal["key"] == "decision_timing":
-        return 2 if signal["status"] != "mixed" else 0
+        return 1 if signal["status"] != "mixed" else 0
     return LEVEL_ORDER[signal["level"]]
 
 

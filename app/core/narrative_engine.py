@@ -1,3 +1,4 @@
+from collections import Counter
 from statistics import mean
 from typing import Protocol
 
@@ -22,9 +23,13 @@ def attach_narratives(periods: list[dict], provider: NarrativeProvider) -> list[
 
 def build_year_overview(periods: list[dict]) -> dict:
     aggregate = {key: 0 for key in DOMAIN_LABELS}
+    signal_counts: Counter[str] = Counter()
     for period in periods:
         for key, value in period["domains"].items():
             aggregate[key] += value
+        for signal in period.get("surfaced_signals", []):
+            if signal["key"] != "decision_timing":
+                signal_counts[signal["key"]] += 1
 
     top_domains = sorted(aggregate, key=aggregate.get, reverse=True)[:3]
     stressful = sum(1 for period in periods if period["tone"] in {"stressful", "volatile", "serious"})
@@ -47,7 +52,8 @@ def build_year_overview(periods: list[dict]) -> dict:
         tone_mix.setdefault(period["tone"], 0)
         tone_mix[period["tone"]] += 1
     ordered_tones = sorted(tone_mix.items(), key=lambda item: item[1], reverse=True)
-    summary = _build_year_summary(top_domains, supportive, stressful, ordered_tones)
+    leading_signal = signal_counts.most_common(1)[0][0] if signal_counts else None
+    summary = _build_year_summary(top_domains, supportive, stressful, ordered_tones, leading_signal)
 
     return {
         "summary": summary,
@@ -76,6 +82,7 @@ def _build_year_summary(
     supportive: int,
     stressful: int,
     ordered_tones: list[tuple[str, int]],
+    leading_signal: str | None,
 ) -> str:
     domain_phrase, verb = _domain_phrase(top_domains[:2])
     lead_tone = ordered_tones[0][0] if ordered_tones else None
@@ -97,7 +104,8 @@ def _build_year_summary(
     elif lead_tone == "volatile":
         guidance = "staying flexible and resisting rushed reactions will matter more than trying to control every turn."
 
-    return f"{domain_phrase} {verb} more of the story this year. {rhythm}, so {guidance}"
+    signal_sentence = _signal_sentence(leading_signal)
+    return f"{domain_phrase} {verb} more of the story this year. {rhythm}, so {guidance}{signal_sentence}"
 
 
 def _domain_phrase(domains: list[str]) -> tuple[str, str]:
@@ -107,3 +115,18 @@ def _domain_phrase(domains: list[str]) -> tuple[str, str]:
     if len(labels) == 1:
         return labels[0], "carries"
     return f"{labels[0]} and {labels[1]}", "carry"
+
+
+def _signal_sentence(signal_key: str | None) -> str:
+    if signal_key is None:
+        return ""
+
+    phrases = {
+        "politics": " Repeated pressure also shows up around people dynamics, mixed motives, or social friction.",
+        "relationships": " Close relationships and expectations may need a lighter touch than usual.",
+        "money": " Money choices and practical commitments look worth handling more deliberately.",
+        "health": " Energy, stress, and emotional load are worth paying closer attention to.",
+        "travel": " Movement, timing, or distance-related plans look more prominent than usual.",
+        "work": " Workload, responsibility, and prioritization carry extra weight in the year.",
+    }
+    return phrases.get(signal_key, "")
