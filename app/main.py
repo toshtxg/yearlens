@@ -60,27 +60,14 @@ def main() -> None:
         """,
         unsafe_allow_html=True,
     )
-    intro_col, note_col = st.columns([1.2, 1], gap="small")
-    with intro_col:
+    with st.expander("How to use YearLens", expanded=False):
         st.markdown(
             """
             <div class="yearlens-note-card">
-                <div class="yearlens-note-title">How To Use It</div>
+                <div class="yearlens-note-title">Getting started</div>
                 <ul class="yearlens-note-list">
                     <li>Enter your birth details and the year you want to explore.</li>
-                    <li>Read one period at a time instead of trying to absorb the whole year at once.</li>
-                    <li>Start in concise mode, then open detailed mode only when you want the deeper reasoning.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with note_col:
-        st.markdown(
-            """
-            <div class="yearlens-note-card yearlens-note-card-muted">
-                <div class="yearlens-note-title">Keep In Mind</div>
-                <ul class="yearlens-note-list">
+                    <li>Read one period at a time — start in concise mode, switch to detailed when you want the deeper reasoning.</li>
                     <li>Treat the reading like guidance for reflection and timing, not certainty.</li>
                     <li>Exact birth time makes the reading more specific, especially around houses.</li>
                     <li>If location lookup is shaky, manual coordinates give a cleaner fallback.</li>

@@ -1,5 +1,56 @@
 from app.core.config import DOMAIN_LABELS, TONE_UI
 
+_HEADLINE_VARIANTS = {
+    "decision_timing": [
+        "Use extra care before locking in major choices",
+        "Pause before signing, committing, or promising",
+        "Give big decisions more room to breathe",
+        "Let important choices sit a little longer",
+        "Timing is noisier here — avoid rushing anything permanent",
+    ],
+    "politics": [
+        "Read people and politics more carefully",
+        "Watch for mixed signals in group dynamics",
+        "Navigate social currents with more caution",
+    ],
+    "relationships": [
+        "Handle relationship dynamics more gently",
+        "Be patient with emotional undercurrents",
+        "Give close relationships a lighter touch",
+    ],
+    "money": [
+        "Keep money decisions measured",
+        "Take extra care around financial commitments",
+        "Avoid impulsive spending or lending",
+    ],
+    "health": [
+        "Slow down enough to protect energy and health",
+        "Your body is asking for more margin here",
+        "Watch for burnout — pace yourself deliberately",
+    ],
+    "travel": [
+        "Movement and timing matter more here",
+        "Travel or relocation plans need extra planning",
+        "Give logistics and travel more buffer time",
+    ],
+    "work": [
+        "Work pressure needs cleaner prioritization",
+        "Focus on fewer things and do them well",
+        "Career demands are louder — choose battles carefully",
+    ],
+}
+
+_GOOD_TIMING_VARIANTS = [
+    "A steadier window for clearer decisions",
+    "Momentum is with you — act with intention",
+    "This stretch favors forward movement",
+]
+
+
+def _pick_variant(variants: list[str], period_id: str, signal_key: str) -> str:
+    index = hash((period_id, signal_key)) % len(variants)
+    return variants[index]
+
 
 class TemplateNarrativeProvider:
     def generate(self, period_data: dict) -> dict:
@@ -7,32 +58,28 @@ class TemplateNarrativeProvider:
         tone_label = TONE_UI[period_data["tone"]]["label"].lower()
         primary_signal = period_data["surfaced_signals"][0] if period_data["surfaced_signals"] else None
         lead_driver = period_data["dominant_drivers"][0]
+        period_id = period_data.get("id", "p0")
 
         return {
-            "headline": _build_headline(primary_signal, primary_domain, tone_label),
+            "headline": _build_headline(primary_signal, primary_domain, tone_label, period_id),
             "concise_text": _build_concise_text(period_data, primary_domain, tone_label),
             "detailed_text": _build_detailed_text(period_data, lead_driver, primary_domain, tone_label),
         }
 
 
-def _build_headline(primary_signal: dict | None, primary_domain: str, tone_label: str) -> str:
+def _build_headline(primary_signal: dict | None, primary_domain: str, tone_label: str, period_id: str) -> str:
     if primary_signal is None:
         return f"{tone_label.capitalize()} focus on {primary_domain}"
 
-    headline_by_signal = {
-        "decision_timing": "Use extra care before locking in major choices",
-        "politics": "Read people and politics more carefully",
-        "relationships": "Handle relationship dynamics more gently",
-        "money": "Keep money decisions measured",
-        "health": "Slow down enough to protect energy and health",
-        "travel": "Movement and timing matter more here",
-        "work": "Work pressure needs cleaner prioritization",
-    }
+    signal_key = primary_signal["key"]
 
-    if primary_signal["key"] == "decision_timing" and primary_signal["status"] == "good":
-        return "A steadier window for clearer decisions"
+    if signal_key == "decision_timing" and primary_signal["status"] == "good":
+        return _pick_variant(_GOOD_TIMING_VARIANTS, period_id, "decision_timing_good")
 
-    return headline_by_signal.get(primary_signal["key"], f"{tone_label.capitalize()} focus on {primary_domain}")
+    if signal_key in _HEADLINE_VARIANTS:
+        return _pick_variant(_HEADLINE_VARIANTS[signal_key], period_id, signal_key)
+
+    return f"{tone_label.capitalize()} focus on {primary_domain}"
 
 
 def _build_concise_text(period_data: dict, primary_domain: str, tone_label: str) -> str:

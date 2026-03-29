@@ -186,13 +186,13 @@ ADVICE_BY_TONE = {
 TONE_UI = {
     "constructive": {"label": "Productive", "emoji": "✅", "description": "steady forward movement"},
     "mixed": {"label": "Mixed", "emoji": "⚖️", "description": "some wins, some friction"},
-    "stressful": {"label": "Stress", "emoji": "⚠️", "description": "higher pressure than usual"},
+    "stressful": {"label": "High-pressure", "emoji": "🔥", "description": "a stretch that asks for more patience and pacing"},
     "active": {"label": "Busy", "emoji": "🏃", "description": "fast-moving and detail-heavy"},
     "expansive": {"label": "Growth", "emoji": "🌱", "description": "more openings and expansion"},
     "supportive": {"label": "Supportive", "emoji": "🤝", "description": "helpful and cooperative"},
-    "serious": {"label": "Heavy", "emoji": "🪨", "description": "responsibility and discipline"},
-    "volatile": {"label": "Unstable", "emoji": "🌪️", "description": "sudden shifts or unpredictability"},
-    "reflective": {"label": "Slow Down", "emoji": "🛋️", "description": "review, rest, and reset"},
+    "serious": {"label": "Demanding", "emoji": "⛰️", "description": "a heavier stretch that rewards focus"},
+    "volatile": {"label": "Shifting", "emoji": "🔀", "description": "shifting ground that rewards flexibility"},
+    "reflective": {"label": "Reflective", "emoji": "🌙", "description": "a quieter stretch for rest and recalibration"},
 }
 
 SIGNAL_UI = {
