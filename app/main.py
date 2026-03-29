@@ -1,4 +1,10 @@
 import json
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import streamlit as st
 from pydantic import ValidationError
@@ -29,6 +35,7 @@ def generate_report(user_input: UserInput) -> dict:
         "metadata": {
             "engine_mode": natal_chart["engine_mode"],
             "input_snapshot": user_input.model_dump(mode="json"),
+            "year_anchor": user_input.year_anchor,
             "window_start": window_start.isoformat(),
             "window_end": window_end.isoformat(),
             "natal_chart": natal_chart,
@@ -65,7 +72,7 @@ def main() -> None:
         return
 
     render_report_actions(report)
-    render_year_overview(report["year_overview"])
+    render_year_overview(report["year_overview"], report["metadata"])
 
     mode = st.radio("Reading mode", ["concise", "detailed"], horizontal=True)
     render_period_timeline(report["periods"], mode=mode)

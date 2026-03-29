@@ -16,6 +16,13 @@ def render_input_form() -> dict | None:
             target_year = int(st.number_input("Target year", min_value=1900, max_value=2100, value=date.today().year, step=1))
             name = st.text_input("Display name", value="")
             year_anchor = st.selectbox("Year anchor", ["birthday", "calendar"], index=0)
+            if birth_date.month == 1 and birth_date.day == 1:
+                st.caption("Your birthday is January 1, so `birthday` and `calendar` will produce the same 2026 window.")
+            else:
+                st.caption(
+                    "`birthday` uses your personal 12-month cycle starting on your birthday. "
+                    "`calendar` uses January 1 to December 31."
+                )
 
         with st.expander("Advanced settings"):
             zodiac = st.selectbox("Zodiac", ["sidereal"], index=0)

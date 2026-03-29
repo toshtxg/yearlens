@@ -41,3 +41,15 @@ def test_blank_location_is_rejected() -> None:
             birth_location="   ",
             target_year=2026,
         )
+
+
+def test_year_anchor_can_be_calendar() -> None:
+    model = UserInput(
+        birth_date=date(1990, 7, 10),
+        birth_time=time(12, 0),
+        birth_location="Singapore",
+        target_year=2026,
+        year_anchor="calendar",
+    )
+
+    assert model.year_anchor == "calendar"

@@ -1,7 +1,7 @@
 from statistics import mean
 from typing import Protocol
 
-from app.core.config import DOMAIN_LABELS
+from app.core.config import DOMAIN_LABELS, DOMAIN_EMOJIS, TONE_UI
 
 
 class NarrativeProvider(Protocol):
@@ -41,7 +41,7 @@ def build_year_overview(periods: list[dict]) -> dict:
     else:
         summary = "A mixed year with alternating pressure and opportunity across the main life areas."
 
-    top_themes = [f"{DOMAIN_LABELS[domain]} stays prominent across multiple periods." for domain in top_domains]
+    top_themes = [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]} stays prominent across multiple periods." for domain in top_domains]
     caution_periods = [
         f"{period['start_date']} to {period['end_date']}"
         for period in periods
@@ -53,11 +53,17 @@ def build_year_overview(periods: list[dict]) -> dict:
         if period["tone"] in {"supportive", "constructive", "expansive"}
     ][:3]
 
+    tone_mix = {}
+    for period in periods:
+        tone_mix.setdefault(period["tone"], 0)
+        tone_mix[period["tone"]] += 1
+    top_tones = sorted(tone_mix, key=tone_mix.get, reverse=True)[:2]
+
     return {
         "summary": summary,
         "top_themes": top_themes,
+        "tone_summary": [f"{TONE_UI[tone]['emoji']} {TONE_UI[tone]['label']}" for tone in top_tones],
         "confidence": round(mean(period["confidence"] for period in periods), 2),
         "top_caution_periods": caution_periods or ["No major caution periods flagged in the placeholder model."],
         "top_opportunity_periods": opportunity_periods or ["No major opportunity periods flagged in the placeholder model."],
     }
-

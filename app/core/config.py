@@ -13,6 +13,15 @@ DOMAIN_LABELS = {
 
 DOMAINS = list(DOMAIN_LABELS)
 
+DOMAIN_EMOJIS = {
+    "career_work": "💼",
+    "money_finance": "💰",
+    "relationships": "❤️",
+    "health_emotional": "🧠",
+    "travel_overseas": "✈️",
+    "study_growth": "📚",
+}
+
 SIGNS = [
     "Aries",
     "Taurus",
@@ -106,6 +115,18 @@ ADVICE_BY_TONE = {
     "reflective": ["Simplify where possible.", "Leave room for rest and reset."],
 }
 
+TONE_UI = {
+    "constructive": {"label": "Productive", "emoji": "✅", "description": "steady forward movement"},
+    "mixed": {"label": "Mixed", "emoji": "⚖️", "description": "some wins, some friction"},
+    "stressful": {"label": "Stress", "emoji": "⚠️", "description": "higher pressure than usual"},
+    "active": {"label": "Busy", "emoji": "🏃", "description": "fast-moving and detail-heavy"},
+    "expansive": {"label": "Growth", "emoji": "🌱", "description": "more openings and expansion"},
+    "supportive": {"label": "Supportive", "emoji": "🤝", "description": "helpful and cooperative"},
+    "serious": {"label": "Heavy", "emoji": "🪨", "description": "responsibility and discipline"},
+    "volatile": {"label": "Unstable", "emoji": "🌪️", "description": "sudden shifts or unpredictability"},
+    "reflective": {"label": "Slow Down", "emoji": "🛋️", "description": "review, rest, and reset"},
+}
+
 
 @dataclass(frozen=True)
 class SegmentConfig:
@@ -116,4 +137,3 @@ class SegmentConfig:
 
 
 DEFAULT_SEGMENT_CONFIG = SegmentConfig()
-

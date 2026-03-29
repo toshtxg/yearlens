@@ -6,6 +6,7 @@ from app.core.config import (
     HOUSE_DOMAIN_MAP,
     HOUSE_MEANINGS,
     PLANET_MEANINGS,
+    TONE_UI,
     TONE_BY_PLANET,
 )
 from app.core.period_engine import PeriodWindow
@@ -85,9 +86,11 @@ def _combined_effect(planet: str, house: int, tone: str, driver) -> str:
     house_terms = ", ".join(HOUSE_MEANINGS[house][:2])
     sign_clause = f" in {driver.sign}" if driver and driver.sign else ""
     event_clause = f" during this {driver.event_type}" if driver else ""
+    tone_label = TONE_UI[tone]["label"].lower()
+    article = "an" if tone_label[:1] in {"a", "e", "i", "o", "u"} else "a"
     return (
         f"{planet}{sign_clause} themes around {planet_terms} concentrate through house {house} matters like "
-        f"{house_terms}{event_clause}, creating a {tone} period."
+        f"{house_terms}{event_clause}, creating {article} {tone_label} period."
     )
 
 
