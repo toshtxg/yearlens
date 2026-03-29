@@ -61,7 +61,7 @@ def build_period_meanings(periods: list[PeriodWindow], natal_chart: dict) -> lis
                 "top_domains": top_domains,
                 "driver_summary": driver_payload["summary"],
                 "signals": signals,
-                "quick_read": _build_quick_read(signals),
+                "period_guidance": _build_period_guidance(signals),
                 "confidence": round(_confidence_score(period), 2),
             }
         )
@@ -144,8 +144,8 @@ def _build_master_signals(period: PeriodWindow, planet: str, house: int, tone: s
 
 def _decision_signal(planet: str, house: int, tone: str, driver) -> dict:
     status = "mixed"
-    short_text = "Important decisions need extra checking"
-    detail_text = "Move carefully on big decisions and review the details twice."
+    short_text = "Decision timing looks mixed"
+    detail_text = "If something is important, give it a second pass before locking it in."
 
     if driver and (
         driver.event_type == "eclipse"
@@ -153,12 +153,12 @@ def _decision_signal(planet: str, house: int, tone: str, driver) -> dict:
         or tone in CAUTION_TONES
     ):
         status = "caution"
-        short_text = "Hold off on big decisions if possible"
-        detail_text = "Not the cleanest window for major commitments, promises, or irreversible choices."
+        short_text = "Use extra care with big decisions"
+        detail_text = "This looks less clean for major commitments, promises, or irreversible choices."
     elif tone in SUPPORT_TONES and planet in {"Sun", "Jupiter", "Venus"} and house not in {8, 12}:
         status = "good"
-        short_text = "Good time for important decisions"
-        detail_text = "One of the cleaner windows to make important decisions and move plans forward."
+        short_text = "A steadier window for key decisions"
+        detail_text = "This looks like one of the cleaner windows to make decisions and move plans forward."
 
     return {
         "key": "decision_timing",
@@ -173,17 +173,17 @@ def _decision_signal(planet: str, house: int, tone: str, driver) -> dict:
 def _backstabber_signal(planet: str, house: int, tone: str) -> dict:
     level = "low"
     short_text = "Politics look manageable"
-    detail_text = "You do not need to assume hidden opposition in this period."
+    detail_text = "People dynamics do not look like the main issue in this period."
 
     if (house in {7, 8, 11, 12} and planet in {"Mars", "Rahu", "Saturn"}) or (
         tone in {"stressful", "volatile", "serious"} and house in {7, 11, 12}
     ):
         level = "high"
-        short_text = "Be careful of backstabbers and politics"
-        detail_text = "Watch for hidden agendas, gossip, office politics, and people who speak differently behind your back."
+        short_text = "Watch people and politics more closely"
+        detail_text = "Keep an eye on hidden agendas, gossip, office politics, or people who may not be fully straightforward."
     elif house in {7, 11, 12} or planet in {"Rahu", "Saturn"}:
         level = "medium"
-        short_text = "Watch politics and mixed motives"
+        short_text = "Be mindful of mixed motives"
         detail_text = "Keep boundaries clear and avoid oversharing sensitive plans."
 
     return {
@@ -204,11 +204,11 @@ def _relationship_signal(house: int, tone: str, scores: dict) -> dict:
     relationship_score = scores["relationships"]
     if (relationship_score >= 6 and tone in CAUTION_TONES) or house in {5, 7, 8} and tone in {"volatile", "stressful", "reflective"}:
         level = "high"
-        short_text = "Be extra careful in relationships"
+        short_text = "Handle relationships with extra care"
         detail_text = "This is a more fragile window for romance, trust, arguments, and emotional misunderstandings."
     elif relationship_score >= 5 or house in {5, 7, 11}:
         level = "medium"
-        short_text = "Handle relationship matters gently"
+        short_text = "Use a softer touch in relationships"
         detail_text = "Clarify expectations and do not rely on assumptions in close relationships."
 
     return {
@@ -229,11 +229,11 @@ def _money_signal(house: int, tone: str, scores: dict) -> dict:
     money_score = scores["money_finance"]
     if (money_score >= 6 and tone in {"stressful", "volatile", "serious"}) or house in {2, 8} and tone in CAUTION_TONES:
         level = "high"
-        short_text = "Be careful about money"
+        short_text = "Keep money decisions measured"
         detail_text = "Avoid risky spending, loans, rushed purchases, and unclear money commitments."
     elif money_score >= 5 or house in {2, 8, 11}:
         level = "medium"
-        short_text = "Double-check money decisions"
+        short_text = "Double-check financial choices"
         detail_text = "Review budgets, contracts, and payment timing before committing."
 
     return {
@@ -254,11 +254,11 @@ def _health_signal(house: int, tone: str, scores: dict) -> dict:
     health_score = scores["health_emotional"]
     if (health_score >= 6 and tone in CAUTION_TONES) or house in {1, 6, 8, 12} and tone in CAUTION_TONES:
         level = "high"
-        short_text = "Be careful about health"
+        short_text = "Mind energy, stress, and health"
         detail_text = "Protect energy, sleep, stress levels, and do not ignore early warning signs."
     elif health_score >= 5 or house in {1, 6, 12}:
         level = "medium"
-        short_text = "Take better care of health"
+        short_text = "Take better care of your routine"
         detail_text = "Keep routines steady and reduce avoidable stress where possible."
 
     return {
@@ -276,15 +276,15 @@ def _dominant_risk(*signals: dict) -> dict:
     return ranked
 
 
-def _build_quick_read(signals: dict) -> list[str]:
-    quick_read = [f"{signals['decision_timing']['emoji']} {signals['decision_timing']['short_text']}"]
+def _build_period_guidance(signals: dict) -> list[str]:
+    guidance = [f"{signals['decision_timing']['emoji']} {signals['decision_timing']['short_text']}"]
 
     for key in ["backstabbers", "relationships", "money", "health"]:
         signal = signals[key]
         if signal["level"] in {"high", "medium"}:
-            quick_read.append(f"{signal['emoji']} {signal['short_text']}")
+            guidance.append(f"{signal['emoji']} {signal['short_text']}")
 
-    return quick_read[:4]
+    return guidance[:4]
 
 
 def _confidence_score(period: PeriodWindow) -> float:

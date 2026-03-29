@@ -52,7 +52,34 @@ def main() -> None:
         """
         <div class="yearlens-hero">
             <h1>YearLens</h1>
-            <p>Personal year reading app using Swiss Ephemeris-backed calculations, whole-sign houses, and rule-based interpretations.</p>
+            <p>YearLens turns your birth details into a structured year reading with time windows, themes to watch, and plain-language guidance.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """
+        <div class="yearlens-card">
+            <div class="yearlens-section-title">How To Use This</div>
+            <ul class="yearlens-list">
+                <li>Enter your birth date, exact birth hour and minute, location, and the target year.</li>
+                <li>Use <strong>birthday</strong> for a personal birthday-to-birthday cycle, or <strong>calendar</strong> for January to December.</li>
+                <li>Read the timeline period by period. The most useful guidance now sits inside each period under <strong>In This Window</strong> and <strong>Advice</strong>.</li>
+                <li>If geocoding is unreliable, use the manual latitude, longitude, and timezone overrides in <strong>Advanced settings</strong>.</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """
+        <div class="yearlens-card">
+            <div class="yearlens-section-title">Disclaimer</div>
+            <ul class="yearlens-list">
+                <li>This app is for reflection and personal guidance, not certainty or guaranteed prediction.</li>
+                <li>Do not use it as the sole basis for medical, legal, financial, or relationship decisions.</li>
+                <li>Treat the output as prompts for judgment and self-awareness, especially when the app says a period looks cleaner or more sensitive.</li>
+            </ul>
         </div>
         """,
         unsafe_allow_html=True,

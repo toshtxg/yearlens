@@ -22,4 +22,4 @@ def test_build_period_meanings_returns_expected_shape() -> None:
     assert payload[0]["advice"]
     assert "signals" in payload[0]
     assert "decision_timing" in payload[0]["signals"]
-    assert payload[0]["quick_read"]
+    assert payload[0]["period_guidance"]

@@ -5,35 +5,26 @@ import streamlit as st
 
 def render_input_form() -> dict | None:
     with st.form("yearlens-input"):
+        current_year = date.today().year
+        year_options = list(range(current_year - 5, current_year + 11))
         date_year_col, name_col = st.columns([1, 1])
         with date_year_col:
             birth_date = st.date_input("Birth date", value=date(1990, 1, 1))
         with name_col:
-            target_year = int(st.number_input("Target year", min_value=1900, max_value=2100, value=date.today().year, step=1))
+            target_year = int(
+                st.selectbox(
+                    "Target year",
+                    options=year_options,
+                    index=year_options.index(current_year),
+                )
+            )
 
         st.markdown("**Birth time**")
         time_col_1, time_col_2 = st.columns(2)
         with time_col_1:
-            birth_hour = int(
-                st.number_input(
-                    "Hour",
-                    min_value=0,
-                    max_value=23,
-                    value=12,
-                    step=1,
-                    help="24-hour format.",
-                )
-            )
+            birth_hour = int(st.selectbox("Hour", options=list(range(24)), index=12, help="24-hour format."))
         with time_col_2:
-            birth_minute = int(
-                st.number_input(
-                    "Minute",
-                    min_value=0,
-                    max_value=59,
-                    value=0,
-                    step=1,
-                )
-            )
+            birth_minute = int(st.selectbox("Minute", options=list(range(60)), index=0))
         birth_time = time(birth_hour, birth_minute)
         st.caption("Enter birth time as exact hour and minute when known.")
 
