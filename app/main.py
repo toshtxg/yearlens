@@ -17,6 +17,7 @@ from app.core.period_engine import build_periods
 from app.providers.template_narrative import TemplateNarrativeProvider
 from app.ui.form import render_input_form
 from app.ui.report import render_report_actions, render_year_overview
+from app.ui.styles import inject_global_styles
 from app.ui.timeline import render_period_timeline
 
 
@@ -46,6 +47,7 @@ def generate_report(user_input: UserInput) -> dict:
 
 def main() -> None:
     st.set_page_config(page_title="YearLens", page_icon="🔭", layout="wide")
+    inject_global_styles()
     st.title("YearLens")
     st.caption(
         "Milestone 2 build using Swiss Ephemeris-backed calculations, whole-sign houses, "
