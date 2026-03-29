@@ -1,40 +1,16 @@
 # YearLens
 
-YearLens is a Streamlit app for generating personal year-ahead readings from sidereal astrology. It computes a natal chart, extracts real yearly transit change points, groups them into readable time windows, and renders each period in concise or detailed mode from the same structured interpretation object.
+YearLens is a Streamlit app for personal year-ahead readings built from sidereal astrology. It turns birth details into a natal chart, extracts real yearly transit change points, groups them into readable periods, and presents each period with plain-language guidance.
 
-The build is intentionally optimized for solo shipping:
+The project is intentionally optimized for fast solo shipping:
 
 - one Streamlit app
-- modular Python services inside the same repo
-- deterministic chart math and rule-based interpretations
-- optional Supabase persistence later
+- modular Python services in the same repo
+- deterministic chart math first
+- rule-based interpretation layer
 - optional LLM narrative layer later
 
-## Current Status
-
-Milestone 2 is underway and already usable for local testing.
-
-What works now:
-
-- validated birth input flow
-- real `swisseph`-backed natal chart calculation
-- sidereal zodiac with Lahiri ayanamsa
-- whole-sign houses
-- true or mean node toggle
-- yearly transit change points from real ingresses, retrograde stations, and eclipse dates
-- period segmentation compressed into a readable yearly timeline
-- concise and detailed report rendering from the same period object
-- optional manual latitude, longitude, and timezone overrides
-
-What is still evolving:
-
-- richer interpretation rules
-- stronger confidence modeling
-- saved report UX
-- optional LLM narrative provider
-- optional Supabase persistence
-
-## Product Shape
+## What The App Does
 
 Inputs:
 
@@ -52,57 +28,58 @@ Optional advanced overrides:
 
 Outputs:
 
-- year overview
-- 8 to 18 timeline periods in the default configuration
+- a year overview
+- a timeline of meaningful periods
 - concise mode for scanning
 - detailed mode for explanation
 
-## Architecture
+## Current Build Status
+
+Working now:
+
+- validated input flow
+- real `swisseph`-backed natal chart calculation
+- sidereal zodiac with Lahiri ayanamsa
+- whole-sign houses
+- true or mean node handling
+- yearly transit change points from ingresses, retrograde stations, and eclipse dates
+- period segmentation into a readable timeline
+- softer period-by-period guidance for decisions, politics, relationships, money, and health
+- mobile-aware and tighter desktop UI
+- optional manual latitude, longitude, and timezone overrides
+
+Still evolving:
+
+- richer interpretation heuristics
+- more nuanced confidence scoring
+- persistence UX
+- optional LLM narrative provider
+
+## Product Philosophy
+
+YearLens is not meant to sound like a hard deterministic oracle. The app uses deterministic chart calculation, but the output layer is framed as reflective guidance:
+
+- it identifies periods and themes
+- it suggests what to watch more closely
+- it avoids presenting the output as certainty
+- it should support judgment, not replace it
+
+## Repo Structure
 
 ```text
 yearlens/
 ├── app/
 │   ├── main.py                  # Streamlit entrypoint
-│   ├── core/                    # Deterministic calculation + rules
+│   ├── core/                    # Calculation and rule logic
 │   ├── providers/               # Narrative providers
 │   ├── storage/                 # Persistence adapters
 │   ├── tests/                   # Pytest suite
 │   └── ui/                      # Streamlit UI helpers
-├── docs/                        # Context, plan, and progress
+├── docs/                        # Product and implementation docs
 ├── sql/                         # Supabase starter schema
 ├── YearLens.md                  # PRD addendum
-└── deep-research-report.md      # Deep research source
+└── deep-research-report.md      # Research source
 ```
-
-## Core Decisions
-
-- zodiac: `sidereal`
-- ayanamsa: `lahiri`
-- house system: `whole_sign`
-- node type: `true` by default
-- year anchor: `birthday`
-- narrative provider: deterministic template provider first
-
-## Technical Notes
-
-### Astrology engine
-
-YearLens now uses the `swisseph` Python wrapper. If you do not configure ephemeris files, Swiss Ephemeris will fall back to its built-in Moshier backend. The app surfaces that backend in the debug payload so accuracy assumptions stay visible.
-
-To point the app at local ephemeris files:
-
-```bash
-export SWISSEPH_EPHE_PATH="/path/to/ephemeris/files"
-```
-
-### Location handling
-
-The app supports two paths:
-
-1. `birth_location` string geocoded through Nominatim
-2. manual latitude, longitude, and timezone override
-
-For stable local testing, the manual override path is the most reliable because it avoids network-dependent geocoding.
 
 ## Run Locally
 
@@ -120,15 +97,44 @@ source venv/bin/activate
 pytest app/tests
 ```
 
-## Docs
+## Deploy On Streamlit Community Cloud
+
+1. Push the repo to GitHub.
+2. In Streamlit Community Cloud, create a new app from this repository.
+3. Select branch `main`.
+4. Set the main file path to `app/main.py`.
+5. Deploy.
+
+Notes:
+
+- the app can run without secrets for local-style usage
+- geocoding may be less reliable in some hosted environments, so manual latitude/longitude/timezone overrides are still useful
+- if you want local Swiss ephemeris files instead of the Moshier fallback, set `SWISSEPH_EPHE_PATH`
+
+## Environment Variables
+
+Defined in [.env.example](.env.example):
+
+- `SWISSEPH_EPHE_PATH`
+- `GEOCODER_USER_AGENT`
+- `NARRATIVE_PROVIDER`
+- `YEARLENS_STORAGE_MODE`
+- `OPENAI_API_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+
+## Documentation
 
 - [docs/context.md](docs/context.md)
+- [docs/model-logic.md](docs/model-logic.md)
+- [docs/technical-implementation.md](docs/technical-implementation.md)
 - [docs/implementation-plan.md](docs/implementation-plan.md)
 - [docs/progress.md](docs/progress.md)
 
-## Near-Term Roadmap
+## Key Caveats
 
-1. deepen the meaning engine so transit type and natal context influence domain scoring more precisely
-2. tighten change-point selection and confidence reporting
-3. add save/load flows and optional Supabase persistence
-4. keep LLM usage optional and downstream of deterministic output
+- if `SWISSEPH_EPHE_PATH` is not set, the wrapper may use the Moshier fallback backend
+- timezone correctness still matters a lot for birth-time-sensitive outputs
+- the interpretation layer is heuristic and still being tuned
+- the app is for reflection and guidance, not certainty or guaranteed prediction
+

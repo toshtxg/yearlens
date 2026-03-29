@@ -1,6 +1,6 @@
 # YearLens Progress
 
-Last updated: 2026-03-28
+Last updated: 2026-03-29
 
 ## Completed
 
@@ -20,6 +20,10 @@ Last updated: 2026-03-28
 - [x] Updated the GitHub-facing README to match the current implementation
 - [x] Verified the test suite passes locally
 - [x] Verified the Streamlit app boots locally
+- [x] Added mobile-aware and tighter desktop layout passes
+- [x] Added intro, user-guide, and disclaimer content in the app header
+- [x] Added softer period guidance around decisions, politics, relationships, money, and health
+- [x] Added dedicated documentation for model logic and technical implementation
 
 ## In Progress
 

@@ -2,8 +2,8 @@
 
 ## Source Documents
 
-- PRD addendum: [YearLens.md](/Users/toshgoh/projects/yearlens/YearLens.md)
-- deep research: [deep-research-report.md](/Users/toshgoh/projects/yearlens/deep-research-report.md)
+- PRD addendum: [YearLens.md](../YearLens.md)
+- deep research: [deep-research-report.md](../deep-research-report.md)
 
 ## Product Goal
 
@@ -16,9 +16,11 @@ Build a personal yearly reading app that:
 - explains every period in concise and detailed modes
 - keeps the core deterministic and keeps LLM usage optional
 
+The intended feel is closer to a practitioner's “period guidance” than a hard predictive engine.
+
 ## Chosen Build Direction
 
-The repo is scaffolded as a Streamlit monolith with internal Python modules because that is the fastest path that still preserves separation of concerns.
+The repo is implemented as a Streamlit monolith with internal Python modules because that is the fastest path that still preserves separation of concerns.
 
 - UI lives in `app/ui`
 - deterministic logic lives in `app/core`
@@ -55,7 +57,8 @@ Current status:
 
 - the repo now has a real `swisseph`-backed natal and transit pipeline
 - location resolution supports both geocoding and manual coordinate overrides
-- the meaning engine is still intentionally lightweight and is the next place to deepen
+- the meaning engine now includes softer period guidance for decisions, politics, relationships, money, and health
+- the interpretation layer is still heuristic and remains the main tuning surface
 
 Deferred from V1:
 
@@ -80,11 +83,17 @@ The research flags Swiss Ephemeris licensing as architecture-shaping. Before wir
 
 Swiss Ephemeris does not resolve local time zones for you. Historical timezone conversion needs an explicit IANA tzdb-backed layer when the real astrology engine is implemented.
 
-## Milestone 2 Caveat
+## Output Caveat
 
 `app/core/astro_engine.py` now performs real calculations through the Swiss Ephemeris wrapper, but the default local setup may still use the Moshier fallback unless ephemeris files are provided through `SWISSEPH_EPHE_PATH`.
 
-That is acceptable for the initial Milestone 2 build because:
+Also important:
+
+- deterministic math does not make the interpretation layer certain
+- the period guidance is still a modeled heuristic layer
+- the app should be framed as reflective guidance, not guaranteed prediction
+
+That is acceptable for the current build because:
 
 - it gives deterministic real chart math immediately
 - it keeps local setup simple

@@ -87,9 +87,9 @@ Definition of done:
 
 ## Current Intent
 
-The current repo is beyond the original scaffold and has entered Milestone 2. The immediate next coding pass should focus on:
+The current repo is beyond the original scaffold and is now in an early-but-usable Milestone 2 state. The immediate next coding pass should focus on:
 
-1. enriching the rule engine with actual interpretation mappings
+1. refining the meaning engine so period guidance sounds more like a practitioner's natural phrasing
 2. improving event weighting and confidence reporting
 3. deciding whether persistence is needed before launch
 4. deciding whether to ship with Moshier fallback or provision Swiss ephemeris files
@@ -100,3 +100,4 @@ The current repo is beyond the original scaffold and has entered Milestone 2. Th
 - do not introduce external services before the deterministic pipeline is stable
 - avoid making the LLM responsible for math or scoring
 - keep report objects structured so they can be saved and re-rendered later
+- prefer soft guidance language over blunt deterministic language in the UI
