@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 THEME_OPTIONS = ["system", "light", "dark"]
 
@@ -35,24 +34,27 @@ def render_theme_toggle() -> str:
 
 def inject_theme_controller(theme_preference: str) -> None:
     preference = json.dumps(_coerce_theme(theme_preference))
-    components.html(
+    st.html(
         f"""
+        <div style="display:none"></div>
         <script>
         const preference = {preference};
-        const parentWindow = window.parent;
-        const parentDocument = parentWindow.document;
-        const root = parentDocument.documentElement;
-        const media = parentWindow.matchMedia("(prefers-color-scheme: dark)");
+        const root = document.documentElement;
+        const media = window.matchMedia("(prefers-color-scheme: dark)");
 
         function applyTheme() {{
             const resolved = preference === "system" ? (media.matches ? "dark" : "light") : preference;
             root.dataset.yearlensThemePreference = preference;
             root.dataset.yearlensTheme = resolved;
             root.style.colorScheme = resolved;
+            if (document.body) {{
+                document.body.dataset.yearlensTheme = resolved;
+                document.body.style.colorScheme = resolved;
+            }}
         }}
 
-        if (parentWindow.__yearlensThemeMediaHandler) {{
-            media.removeEventListener("change", parentWindow.__yearlensThemeMediaHandler);
+        if (window.__yearlensThemeMediaHandler) {{
+            media.removeEventListener("change", window.__yearlensThemeMediaHandler);
         }}
 
         const handler = () => {{
@@ -61,13 +63,13 @@ def inject_theme_controller(theme_preference: str) -> None:
             }}
         }};
 
-        parentWindow.__yearlensThemeMediaHandler = handler;
+        window.__yearlensThemeMediaHandler = handler;
         media.addEventListener("change", handler);
         applyTheme();
         </script>
         """,
-        height=0,
-        width=0,
+        width="content",
+        unsafe_allow_javascript=True,
     )
 
 

@@ -26,17 +26,14 @@ def _render_domain_scores(period: dict) -> None:
         score = period["domains"][domain]
         width = max(12, min(100, score * 10))
         rows.append(
-            f"""
-            <div class="yearlens-score-row">
-                <div class="yearlens-score-meta">
-                    <span>{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}</span>
-                    <span>{score}/10</span>
-                </div>
-                <div class="yearlens-score-bar"><span style="width:{width}%"></span></div>
-            </div>
-            """
+            (
+                '<div class="yearlens-score-row">'
+                f'<div class="yearlens-score-meta"><span>{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}</span><span>{score}/10</span></div>'
+                f'<div class="yearlens-score-bar"><span style="width:{width}%"></span></div>'
+                "</div>"
+            )
         )
-    st.markdown(f"<div class='yearlens-score-list'>{''.join(rows)}</div>", unsafe_allow_html=True)
+    st.html(f"<div class='yearlens-score-list'>{''.join(rows)}</div>")
 
 
 def _render_explanation_blocks(period: dict) -> None:
