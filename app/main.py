@@ -1,5 +1,6 @@
 import json
 import sys
+from html import escape
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,7 @@ from app.core.input_schema import UserInput
 from app.core.meaning_engine import build_period_meanings
 from app.core.narrative_engine import attach_narratives, build_year_overview
 from app.core.period_engine import build_periods
+from app.i18n import get_lang, t
 from app.providers.template_narrative import TemplateNarrativeProvider
 from app.ui.form import render_input_form
 from app.ui.report import render_report_actions, render_year_overview, render_year_timeline_bar
@@ -21,18 +23,19 @@ from app.ui.styles import inject_global_styles
 from app.ui.timeline import render_period_timeline
 
 
-def generate_report(user_input: UserInput) -> dict:
+def generate_report(user_input: UserInput, lang: str = "en") -> dict:
     window_start, window_end = get_year_window(user_input)
     natal_chart = build_natal_chart(user_input)
     change_points = build_year_change_points(user_input, natal_chart, window_start, window_end)
     periods = build_periods(window_start, window_end, change_points)
-    structured_periods = build_period_meanings(periods, natal_chart)
+    structured_periods = build_period_meanings(periods, natal_chart, lang)
     provider = TemplateNarrativeProvider()
-    period_payload = attach_narratives(structured_periods, provider)
+    period_payload = attach_narratives(structured_periods, provider, lang)
 
     return {
-        "year_overview": build_year_overview(period_payload),
+        "year_overview": build_year_overview(period_payload, lang),
         "periods": period_payload,
+        "lang": lang,
         "metadata": {
             "engine_mode": natal_chart["engine_mode"],
             "input_snapshot": user_input.model_dump(mode="json"),
@@ -48,29 +51,45 @@ def generate_report(user_input: UserInput) -> dict:
 def main() -> None:
     st.set_page_config(page_title="YearLens", page_icon="🔭", layout="wide")
     inject_global_styles()
+
+    # Language toggle in sidebar
+    lang_options = {"English": "en", "中文": "zh"}
+    selected_lang = st.sidebar.selectbox(
+        "🌐 Language / 语言",
+        list(lang_options),
+        index=list(lang_options.values()).index(st.session_state.get("lang", "en")),
+    )
+    new_lang = lang_options[selected_lang]
+    if new_lang != st.session_state.get("lang", "en"):
+        st.session_state["lang"] = new_lang
+        st.session_state.pop("yearlens_report", None)
+        st.rerun()
+    st.session_state["lang"] = new_lang
+
+    lang = get_lang()
+
     st.markdown(
-        """
+        f"""
         <div class="yearlens-hero-shell">
-            <div class="yearlens-eyebrow">Year Reading Companion</div>
+            <div class="yearlens-eyebrow">{escape(str(t("hero_eyebrow")))}</div>
             <div class="yearlens-hero">
-                <h1>YearLens</h1>
-                <p>A calmer way to read the year ahead: clear windows, plain-language themes, and softer guidance built from your birth details without making the experience feel like a technical dashboard.</p>
+                <h1>{escape(str(t("hero_title")))}</h1>
+                <p>{escape(str(t("hero_tagline")))}</p>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    with st.expander("How to use YearLens", expanded=False):
+
+    howto_items = t("howto_items")
+    items_html = "".join(f"<li>{escape(item)}</li>" for item in howto_items)
+    with st.expander(str(t("howto_title")), expanded=False):
         st.markdown(
-            """
+            f"""
             <div class="yearlens-note-card">
-                <div class="yearlens-note-title">Getting started</div>
+                <div class="yearlens-note-title">{escape(str(t("howto_section_title")))}</div>
                 <ul class="yearlens-note-list">
-                    <li>Enter your birth details and the year you want to explore.</li>
-                    <li>Read one period at a time — start in concise mode, switch to detailed when you want the deeper reasoning.</li>
-                    <li>Treat the reading like guidance for reflection and timing, not certainty.</li>
-                    <li>Exact birth time makes the reading more specific, especially around houses.</li>
-                    <li>If location lookup is shaky, manual coordinates give a cleaner fallback.</li>
+                    {items_html}
                 </ul>
             </div>
             """,
@@ -83,24 +102,24 @@ def main() -> None:
         try:
             user_input = UserInput.model_validate(payload)
         except ValidationError as exc:
-            st.error("Input validation failed. Fix the highlighted values and try again.")
+            st.error(str(t("error_validation")))
             st.code(json.dumps(exc.errors(), indent=2))
         else:
             try:
-                st.session_state["yearlens_report"] = generate_report(user_input)
+                st.session_state["yearlens_report"] = generate_report(user_input, lang)
             except ValueError as exc:
                 st.error(str(exc))
-                st.info("If the location lookup is the issue, open Advanced settings and provide manual latitude, longitude, and timezone.")
+                st.info(str(t("error_location_hint")))
             except Exception as exc:
-                st.error(f"Report generation failed: {exc}")
+                st.error(str(t("error_report", error=str(exc))))
 
     report = st.session_state.get("yearlens_report")
     if not report:
         st.markdown(
-            """
+            f"""
             <div class="yearlens-placeholder-card">
-                <div class="yearlens-placeholder-title">Generate your reading</div>
-                <div class="yearlens-placeholder-copy">Submit the form to build a full YearLens report. If place-name lookup is unreliable, use the manual latitude, longitude, and timezone fields under advanced options.</div>
+                <div class="yearlens-placeholder-title">{escape(str(t("placeholder_title")))}</div>
+                <div class="yearlens-placeholder-copy">{escape(str(t("placeholder_copy")))}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -110,16 +129,20 @@ def main() -> None:
     render_year_overview(report["year_overview"], report["metadata"])
     render_year_timeline_bar(report["periods"])
 
-    st.markdown("<div class='yearlens-section-heading yearlens-section-heading-compact'>Read The Year</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='yearlens-section-heading yearlens-section-heading-compact'>{escape(str(t('read_the_year')))}</div>",
+        unsafe_allow_html=True,
+    )
     mode = st.segmented_control(
         "Reading mode",
-        options=["Concise", "Detailed"],
-        default="Concise",
+        options=[str(t("mode_concise")), str(t("mode_detailed"))],
+        default=str(t("mode_concise")),
         selection_mode="single",
         width="content",
         label_visibility="collapsed",
     )
-    render_period_timeline(report["periods"], mode=(mode or "Concise").lower())
+    mode_key = "detailed" if mode == str(t("mode_detailed")) else "concise"
+    render_period_timeline(report["periods"], mode=mode_key)
     render_report_actions(report)
 
     if st.query_params.get("debug"):

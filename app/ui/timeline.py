@@ -5,12 +5,13 @@ from html import escape
 
 import streamlit as st
 
-from app.core.config import DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
+from app.core.config import DOMAIN_EMOJIS, TONE_COLORS, get_domain_labels, get_tone_ui
+from app.i18n import get_lang, t
 
 
 def _render_pill_row(items: list[str]) -> None:
     pills = "".join(
-        f"<span class='yearlens-pill{' yearlens-pill-now' if item == 'Now' else ''}'>{escape(item)}</span>"
+        f"<span class='yearlens-pill{' yearlens-pill-now' if item == str(t('pill_now')) else ''}'>{escape(item)}</span>"
         for item in items
     )
     st.markdown(f"<div class='yearlens-pill-row'>{pills}</div>", unsafe_allow_html=True)
@@ -29,7 +30,7 @@ def _render_signal_grid_with_limit(signals: list[dict], limit: int) -> None:
     if not signals:
         return
 
-    st.markdown("<div class='yearlens-section-title'>What stands out here</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='yearlens-section-title'>{escape(str(t('signals_title')))}</div>", unsafe_allow_html=True)
     trimmed_signals = signals[:limit]
     for row_start in range(0, len(trimmed_signals), 2):
         row_signals = trimmed_signals[row_start:row_start + 2]
@@ -50,14 +51,14 @@ def _render_signal_grid_with_limit(signals: list[dict], limit: int) -> None:
 def _render_action_cards(period: dict) -> None:
     left_col, right_col = st.columns(2, gap="small")
     with left_col:
-        st.markdown("<div class='yearlens-section-title'>Lean into</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='yearlens-section-title'>{escape(str(t('lean_into')))}</div>", unsafe_allow_html=True)
         items = "".join(f"<li>{escape(f'✅ {item}')}</li>" for item in period["use_for"][:2])
         st.markdown(
             f"<div class='yearlens-action-card yearlens-action-card-up'><ul class='yearlens-compact-list'>{items}</ul></div>",
             unsafe_allow_html=True,
         )
     with right_col:
-        st.markdown("<div class='yearlens-section-title'>Go slower with</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='yearlens-section-title'>{escape(str(t('go_slower')))}</div>", unsafe_allow_html=True)
         items = "".join(f"<li>{escape(f'⚠️ {item}')}</li>" for item in period["careful_with"][:2])
         st.markdown(
             f"<div class='yearlens-action-card yearlens-action-card-warn'><ul class='yearlens-compact-list'>{items}</ul></div>",
@@ -66,7 +67,9 @@ def _render_action_cards(period: dict) -> None:
 
 
 def _render_domain_scores(period: dict) -> None:
-    st.markdown("<div class='yearlens-section-title'>Main Focus Areas</div>", unsafe_allow_html=True)
+    lang = get_lang()
+    domain_labels = get_domain_labels(lang)
+    st.markdown(f"<div class='yearlens-section-title'>{escape(str(t('focus_areas')))}</div>", unsafe_allow_html=True)
 
     cards = []
     for domain in period["top_domains"]:
@@ -75,7 +78,7 @@ def _render_domain_scores(period: dict) -> None:
         cards.append(
             (
                 "<div class='yearlens-score-card'>"
-                f"<div class='yearlens-score-card-head'><span>{DOMAIN_EMOJIS[domain]} {escape(DOMAIN_LABELS[domain])}</span><span>{score}/10</span></div>"
+                f"<div class='yearlens-score-card-head'><span>{DOMAIN_EMOJIS[domain]} {escape(domain_labels[domain])}</span><span>{score}/10</span></div>"
                 f"<div class='yearlens-score-meter'><span style='width:{width}%'></span></div>"
                 "</div>"
             )
@@ -84,7 +87,9 @@ def _render_domain_scores(period: dict) -> None:
 
 
 def _render_focus_pills(period: dict) -> None:
-    items = [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}" for domain in period["top_domains"]]
+    lang = get_lang()
+    domain_labels = get_domain_labels(lang)
+    items = [f"{DOMAIN_EMOJIS[domain]} {domain_labels[domain]}" for domain in period["top_domains"]]
     _render_pill_row(items)
 
 
@@ -96,7 +101,7 @@ def _render_takeaway_card(advice: list[str]) -> None:
     follow_up_html = f"<div class='yearlens-takeaway-sub'>{escape(follow_up)}</div>" if follow_up else ""
     st.markdown(
         (
-            "<div class='yearlens-section-title'>A simple takeaway</div>"
+            f"<div class='yearlens-section-title'>{escape(str(t('takeaway_title')))}</div>"
             f"<div class='yearlens-takeaway-card'><div class='yearlens-takeaway-lead'>💡 {escape(lead)}</div>"
             f"{follow_up_html}</div>"
         ),
@@ -108,9 +113,9 @@ def _render_explanation_blocks(period: dict) -> None:
     confidence = period["confidence_breakdown"]
     _render_pill_row(
         [
-            f"Event strength {confidence['event_strength']:.0%}",
-            f"Signal agreement {confidence['signal_agreement']:.0%}",
-            f"Data quality {confidence['data_quality']:.0%}",
+            str(t("event_strength", value=f"{confidence['event_strength']:.0%}")),
+            str(t("signal_agreement", value=f"{confidence['signal_agreement']:.0%}")),
+            str(t("data_quality", value=f"{confidence['data_quality']:.0%}")),
         ]
     )
 
@@ -129,14 +134,18 @@ def _render_explanation_blocks(period: dict) -> None:
 
 def _clarity_label(confidence: float) -> str:
     if confidence >= 0.8:
-        return "Clarity: strong"
+        return str(t("clarity_strong"))
     if confidence >= 0.68:
-        return "Clarity: moderate"
-    return "Clarity: general direction"
+        return str(t("clarity_moderate"))
+    return str(t("clarity_general"))
 
 
 def render_period_timeline(periods: list[dict], mode: str) -> None:
-    st.caption("Read each period like a weather shift: headline first, then the focus areas and cautions underneath.")
+    lang = get_lang()
+    domain_labels = get_domain_labels(lang)
+    tone_ui = get_tone_ui(lang)
+
+    st.caption(str(t("timeline_caption")))
     today = date.today()
     current_period_id = next(
         (
@@ -148,7 +157,7 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
     )
 
     for index, period in enumerate(periods):
-        tone_meta = TONE_UI[period["tone"]]
+        tone_meta = tone_ui[period["tone"]]
         primary_domain = period["top_domains"][0]
         header = f"{tone_meta['emoji']} {_pretty_header_range(period['start_date'], period['end_date'])} · {period['headline']}"
         tone_color = TONE_COLORS[period["tone"]]
@@ -163,10 +172,10 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
             header_pills = [
                 _pretty_date_range(period["start_date"], period["end_date"]),
                 tone_meta["label"],
-                f"Main focus: {DOMAIN_LABELS[primary_domain]}",
+                str(t("main_focus", domain=domain_labels[primary_domain])),
             ]
             if is_current:
-                header_pills.insert(0, "Now")
+                header_pills.insert(0, str(t("pill_now")))
             if mode == "detailed":
                 header_pills.append(_clarity_label(period["confidence"]))
             _render_pill_row(header_pills)
@@ -185,10 +194,10 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
                 st.markdown(
                     (
                         "<div class='yearlens-story-card'>"
-                        "<div class='yearlens-story-kicker'>Plain-language read</div>"
+                        f"<div class='yearlens-story-kicker'>{escape(str(t('story_kicker')))}</div>"
                         f"<div class='yearlens-period-headline'>{escape(period['headline'])}</div>"
                         f"<div class='yearlens-story-copy'>{escape(period['detailed_text'])}</div>"
-                        f"<div class='yearlens-story-meta'>What this usually feels like: {escape(tone_meta['description'])}.</div>"
+                        f"<div class='yearlens-story-meta'>{escape(str(t('story_meta', description=tone_meta['description'])))}</div>"
                         "</div>"
                     ),
                     unsafe_allow_html=True,
@@ -198,14 +207,14 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
                 _render_signal_grid_with_limit(period["surfaced_signals"], 3)
             _render_action_cards(period)
             if mode == "concise":
-                st.markdown("<div class='yearlens-section-title'>Main Focus Areas</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='yearlens-section-title'>{escape(str(t('focus_areas')))}</div>", unsafe_allow_html=True)
                 _render_focus_pills(period)
             else:
                 _render_domain_scores(period)
                 _render_takeaway_card(period["advice"])
 
             if mode == "detailed":
-                with st.expander("Why this period was read this way", expanded=False):
+                with st.expander(str(t("explanation_title")), expanded=False):
                     _render_explanation_blocks(period)
 
 
