@@ -84,37 +84,56 @@ def _build_year_summary(
     ordered_tones: list[tuple[str, int]],
     leading_signal: str | None,
 ) -> str:
-    domain_phrase, verb = _domain_phrase(top_domains[:2])
+    domain_phrase = _domain_focus_phrase(top_domains[:2])
     lead_tone = ordered_tones[0][0] if ordered_tones else None
 
-    if supportive >= stressful + 2:
-        rhythm = "The rhythm is more open than blocked overall"
-        guidance = "use the steadier stretches to move things forward without overextending."
-    elif stressful >= supportive + 2:
-        rhythm = "The rhythm runs more demanding than light"
-        guidance = "pacing, clearer boundaries, and better timing matter more than forcing results."
-    else:
-        rhythm = "The rhythm shifts between supportive and sharper stretches"
-        guidance = "you will get better results by adjusting pace instead of treating the whole year the same."
-
-    if lead_tone == "reflective":
-        guidance = "slowing down, listening to what is changing internally, and choosing timing carefully will help more than pushing."
-    elif lead_tone == "supportive":
-        guidance = "there is usable momentum here, especially when you build on what is already working."
-    elif lead_tone == "volatile":
-        guidance = "staying flexible and resisting rushed reactions will matter more than trying to control every turn."
+    intro = f"This year brings more focus to {domain_phrase}."
+    middle = _year_middle_sentence(supportive, stressful, lead_tone)
 
     signal_sentence = _signal_sentence(leading_signal)
-    return f"{domain_phrase} {verb} more of the story this year. {rhythm}, so {guidance}{signal_sentence}"
+    return f"{intro} {middle}{signal_sentence}"
 
 
-def _domain_phrase(domains: list[str]) -> tuple[str, str]:
-    labels = [DOMAIN_LABELS[domain] for domain in domains if domain in DOMAIN_LABELS]
-    if not labels:
-        return "A few different areas", "carry"
-    if len(labels) == 1:
-        return labels[0], "carries"
-    return f"{labels[0]} and {labels[1]}", "carry"
+def _year_middle_sentence(supportive: int, stressful: int, lead_tone: str | None) -> str:
+    if supportive >= stressful + 2:
+        if lead_tone == "volatile":
+            return "Overall, there is room for progress, but plans may change faster than expected, so flexibility will help."
+        if lead_tone == "supportive":
+            return "Overall, there is usable momentum here, especially when you build on what is already working."
+        return "Overall, the year looks more open than blocked, and the steadier stretches are worth using well."
+
+    if stressful >= supportive + 2:
+        if lead_tone == "volatile":
+            return "Overall, it may feel more demanding and less predictable than easy, so staying flexible will help more than forcing things."
+        if lead_tone == "reflective":
+            return "Overall, it may feel slower and heavier than easy, so patience and self-awareness will help more than pushing."
+        return "Overall, it may feel a little heavier than easy, so pacing yourself and choosing your timing well will help."
+
+    if lead_tone == "volatile":
+        return "Overall, the year looks mixed and somewhat changeable, so staying flexible will help more than locking in too quickly."
+    if lead_tone == "supportive":
+        return "Overall, the year looks mixed, but there are still some supportive stretches you can build on."
+    if lead_tone == "reflective":
+        return "Overall, the year looks mixed, with some slower stretches that may ask for patience and more inner space."
+    return "Overall, the year looks mixed, with some stretches that flow and others that need more care."
+
+
+def _domain_focus_phrase(domains: list[str]) -> str:
+    phrases = {
+        "career_work": "work, direction, and responsibility",
+        "money_finance": "money, security, and practical decisions",
+        "relationships": "relationships, closeness, and expectations",
+        "health_emotional": "health, emotional balance, and recovery",
+        "travel_overseas": "travel, movement, and wider horizons",
+        "study_growth": "learning, perspective, and personal growth",
+    }
+
+    selected = [phrases[domain] for domain in domains if domain in phrases]
+    if not selected:
+        return "a few different parts of life"
+    if len(selected) == 1:
+        return selected[0]
+    return f"{selected[0]}, along with {selected[1]}"
 
 
 def _signal_sentence(signal_key: str | None) -> str:
@@ -122,11 +141,11 @@ def _signal_sentence(signal_key: str | None) -> str:
         return ""
 
     phrases = {
-        "politics": " Repeated pressure also shows up around people dynamics, mixed motives, or social friction.",
-        "relationships": " Close relationships and expectations may need a lighter touch than usual.",
-        "money": " Money choices and practical commitments look worth handling more deliberately.",
-        "health": " Energy, stress, and emotional load are worth paying closer attention to.",
-        "travel": " Movement, timing, or distance-related plans look more prominent than usual.",
-        "work": " Workload, responsibility, and prioritization carry extra weight in the year.",
+        "politics": " People dynamics may need a little more discernment than usual.",
+        "relationships": " Relationships may need more gentleness and clearer expectations.",
+        "money": " Money decisions are worth handling a little more deliberately.",
+        "health": " Energy and stress are worth paying closer attention to.",
+        "travel": " Travel, movement, or timing may come up more than usual.",
+        "work": " Workload and responsibility may take up more space than usual.",
     }
     return phrases.get(signal_key, "")
