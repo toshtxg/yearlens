@@ -320,6 +320,13 @@ def inject_global_styles() -> None:
             border: 1px solid rgba(148, 163, 184, 0.16);
         }
 
+        .yearlens-pill-now {
+            background: var(--yl-accent);
+            color: #111827;
+            font-weight: 800;
+            border-color: transparent;
+        }
+
         .yearlens-section-heading {
             font-size: 1.45rem;
             font-family: "Space Grotesk", sans-serif;
@@ -393,6 +400,125 @@ def inject_global_styles() -> None:
             border: 1px solid rgba(148, 163, 184, 0.16);
         }
 
+        .yearlens-tone-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            margin: 0.2rem 0 0.9rem 0;
+        }
+
+        .yearlens-tone-chip,
+        .yearlens-timeline-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            background: rgba(26, 38, 61, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            color: var(--yl-text);
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .yearlens-tone-dot {
+            width: 0.62rem;
+            height: 0.62rem;
+            border-radius: 999px;
+            flex: 0 0 auto;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+        }
+
+        .yearlens-domain-emphasis-shell,
+        .yearlens-year-rhythm {
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 20px;
+            padding: 0.85rem 0.9rem 0.9rem 0.9rem;
+            background: rgba(18, 28, 44, 0.72);
+            margin-bottom: 0.85rem;
+        }
+
+        .yearlens-section-title-inline {
+            margin-top: 0;
+            margin-bottom: 0.6rem;
+        }
+
+        .yearlens-domain-emphasis-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.6rem;
+        }
+
+        .yearlens-domain-emphasis-card {
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 16px;
+            padding: 0.72rem 0.78rem;
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .yearlens-domain-emphasis-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            color: var(--yl-text);
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 0.38rem;
+        }
+
+        .yearlens-domain-emphasis-meter {
+            width: 100%;
+            height: 0.42rem;
+            border-radius: 999px;
+            background: rgba(58, 72, 102, 0.6);
+            overflow: hidden;
+        }
+
+        .yearlens-domain-emphasis-meter span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(125, 211, 252, 0.95), rgba(215, 164, 65, 0.95));
+        }
+
+        .yearlens-timeline-bar {
+            display: flex;
+            width: 100%;
+            height: 38px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .yearlens-timeline-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            color: #111827;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: default;
+            transition: opacity 0.15s ease;
+            border-radius: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .yearlens-timeline-segment:hover {
+            opacity: 0.82;
+        }
+
+        .yearlens-timeline-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.7rem;
+        }
+
         .yearlens-mini-card {
             height: 100%;
             border: 1px solid var(--yl-border);
@@ -462,6 +588,10 @@ def inject_global_styles() -> None:
             margin-bottom: 0.7rem;
         }
 
+        .yearlens-story-card-concise {
+            margin-bottom: 0.82rem;
+        }
+
         .yearlens-story-kicker {
             font-size: 0.74rem;
             text-transform: uppercase;
@@ -504,6 +634,13 @@ def inject_global_styles() -> None:
             color: var(--yl-text-soft);
             font-size: 0.9rem;
             line-height: 1.55;
+        }
+
+        .yearlens-period-accent {
+            height: 4px;
+            border-radius: 999px 999px 0 0;
+            margin: 0.35rem 0 -0.35rem 0;
+            opacity: 0.9;
         }
 
         .yearlens-action-card {
@@ -616,6 +753,7 @@ def inject_global_styles() -> None:
         }
 
         @media (max-width: 900px) {
+            .yearlens-domain-emphasis-grid,
             .yearlens-score-grid {
                 grid-template-columns: 1fr;
             }

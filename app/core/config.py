@@ -195,6 +195,18 @@ TONE_UI = {
     "reflective": {"label": "Reflective", "emoji": "🌙", "description": "a quieter stretch for rest and recalibration"},
 }
 
+TONE_COLORS = {
+    "constructive": "#4ade80",
+    "mixed": "#a78bfa",
+    "stressful": "#f87171",
+    "active": "#60a5fa",
+    "expansive": "#34d399",
+    "supportive": "#fbbf24",
+    "serious": "#9ca3af",
+    "volatile": "#fb923c",
+    "reflective": "#c4b5fd",
+}
+
 SIGNAL_UI = {
     "decision_timing": {"label": "Decision Timing", "emoji": "🧭"},
     "politics": {"label": "People / Politics", "emoji": "🕵️"},

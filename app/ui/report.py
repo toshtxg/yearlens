@@ -5,6 +5,8 @@ from html import escape
 
 import streamlit as st
 
+from app.core.config import DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
+
 
 def _render_pill_row(items: list[str]) -> None:
     pills = "".join(f"<span class='yearlens-pill'>{escape(item)}</span>" for item in items)
@@ -27,10 +29,10 @@ def _render_list_card(title: str, items: list[str], card_class: str = "", card_k
 
 def _year_signal_label(confidence: float) -> str:
     if confidence >= 0.8:
-        return "Clearer overall signal"
+        return "Strong signal clarity"
     if confidence >= 0.68:
-        return "Mixed but usable signal"
-    return "Gentler, lower-contrast signal"
+        return "Moderate signal clarity"
+    return "Softer signal - read as general direction"
 
 
 def _render_period_item(item: str) -> str:
@@ -62,9 +64,114 @@ def _format_date_range(start: date, end: date) -> str:
     return f"{start.strftime('%b')} {start.day}, {start.year} to {end.strftime('%b')} {end.day}, {end.year}"
 
 
+def _format_window_text(start_value: str, end_value: str) -> str:
+    return _format_date_range(date.fromisoformat(start_value), date.fromisoformat(end_value))
+
+
+def _render_tone_summary_chips(tone_summary: list[dict]) -> None:
+    chips = []
+    for item in tone_summary:
+        color = TONE_COLORS[item["tone"]]
+        chips.append(
+            (
+                "<span class='yearlens-tone-chip'>"
+                f"<span class='yearlens-tone-dot' style='background:{color};'></span>"
+                f"{escape(item['label'])}"
+                "</span>"
+            )
+        )
+    st.markdown(f"<div class='yearlens-tone-chip-row'>{''.join(chips)}</div>", unsafe_allow_html=True)
+
+
+def _render_domain_emphasis(overview: dict) -> None:
+    top_domains = sorted(overview["domain_totals"], key=overview["domain_totals"].get, reverse=True)[:3]
+    max_total = max(overview["domain_totals"][domain] for domain in top_domains) or 1
+
+    cards = []
+    for domain in top_domains:
+        score = overview["domain_totals"][domain]
+        width = max(18, min(100, round((score / max_total) * 100)))
+        cards.append(
+            (
+                "<div class='yearlens-domain-emphasis-card'>"
+                f"<div class='yearlens-domain-emphasis-head'><span>{DOMAIN_EMOJIS[domain]} {escape(DOMAIN_LABELS[domain])}</span><span>{score:.1f}</span></div>"
+                f"<div class='yearlens-domain-emphasis-meter'><span style='width:{width}%'></span></div>"
+                "</div>"
+            )
+        )
+
+    st.markdown(
+        (
+            "<div class='yearlens-domain-emphasis-shell'>"
+            "<div class='yearlens-section-title yearlens-section-title-inline'>Themes carrying the most weight this year</div>"
+            f"<div class='yearlens-domain-emphasis-grid'>{''.join(cards)}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def render_year_timeline_bar(periods: list[dict]) -> None:
+    if not periods:
+        return
+
+    total_days = sum(_period_duration(period) for period in periods) or 1
+    segments = []
+    tone_order: list[str] = []
+    for period in periods:
+        tone = period["tone"]
+        if tone not in tone_order:
+            tone_order.append(tone)
+        width = (_period_duration(period) / total_days) * 100
+        label = _format_segment_label(period["start_date"], period["end_date"]) if width > 8 else ""
+        tooltip = f"{_format_window_text(period['start_date'], period['end_date'])}: {TONE_UI[tone]['label']}"
+        segments.append(
+            (
+                f"<div class='yearlens-timeline-segment' style='width:{width:.2f}%; background:{TONE_COLORS[tone]};' title='{escape(tooltip)}'>"
+                f"{escape(label)}"
+                "</div>"
+            )
+        )
+
+    legend_items = "".join(
+        (
+            "<span class='yearlens-timeline-legend-item'>"
+            f"<span class='yearlens-tone-dot' style='background:{TONE_COLORS[tone]};'></span>"
+            f"{escape(TONE_UI[tone]['label'])}"
+            "</span>"
+        )
+        for tone in tone_order
+    )
+
+    st.markdown(
+        (
+            "<div class='yearlens-year-rhythm'>"
+            "<div class='yearlens-section-title yearlens-section-title-inline'>Year rhythm</div>"
+            f"<div class='yearlens-timeline-bar'>{''.join(segments)}</div>"
+            f"<div class='yearlens-timeline-legend'>{legend_items}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def _period_duration(period: dict) -> int:
+    start = date.fromisoformat(period["start_date"])
+    end = date.fromisoformat(period["end_date"])
+    return (end - start).days + 1
+
+
+def _format_segment_label(start_value: str, end_value: str) -> str:
+    start = date.fromisoformat(start_value)
+    end = date.fromisoformat(end_value)
+    if start.month == end.month:
+        return f"{start.strftime('%b')} {start.day}-{end.day}"
+    return f"{start.strftime('%b')} {start.day}-{end.strftime('%b')} {end.day}"
+
+
 def render_year_overview(overview: dict, metadata: dict) -> None:
     anchor_label = "Birthday cycle" if metadata["year_anchor"] == "birthday" else "Calendar year"
-    window_text = f"{metadata['window_start']} to {metadata['window_end']}"
+    window_text = _format_window_text(metadata["window_start"], metadata["window_end"])
 
     st.markdown(
         f"""
@@ -84,7 +191,8 @@ def render_year_overview(overview: dict, metadata: dict) -> None:
     if metadata["year_anchor"] == "birthday" and metadata["input_snapshot"]["birth_date"].endswith("-01-01"):
         st.caption("Birthday and calendar anchors are identical here because the birth date is January 1.")
 
-    _render_pill_row(overview.get("tone_summary", []))
+    _render_tone_summary_chips(overview["tone_summary"])
+    _render_domain_emphasis(overview)
 
     col1, col2, col3 = st.columns(3, gap="small")
     with col1:

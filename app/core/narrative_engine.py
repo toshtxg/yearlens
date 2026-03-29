@@ -1,7 +1,7 @@
 from statistics import mean
 from typing import Protocol
 
-from app.core.config import DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_UI
+from app.core.config import DOMAINS, DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_UI
 
 
 class NarrativeProvider(Protocol):
@@ -53,13 +53,25 @@ def build_year_overview(periods: list[dict]) -> dict:
     for period in periods:
         tone_mix.setdefault(period["tone"], 0)
         tone_mix[period["tone"]] += 1
-    top_tones = sorted(tone_mix, key=tone_mix.get, reverse=True)[:2]
+    ordered_tones = sorted(tone_mix.items(), key=lambda item: item[1], reverse=True)
 
     return {
         "summary": summary,
         "top_themes": top_themes,
-        "tone_summary": [f"{TONE_UI[tone]['emoji']} {TONE_UI[tone]['label']}" for tone in top_tones],
+        "tone_summary": [
+            {
+                "tone": tone,
+                "label": TONE_UI[tone]["label"],
+                "emoji": TONE_UI[tone]["emoji"],
+                "count": count,
+            }
+            for tone, count in ordered_tones
+        ],
         "confidence": round(mean(period["confidence"] for period in periods), 2),
+        "domain_totals": {
+            domain: round(sum(period["domains"][domain] for period in periods) / len(periods), 1)
+            for domain in DOMAINS
+        },
         "top_caution_periods": caution_periods or ["No strong caution windows were surfaced from the current ruleset."],
         "top_opportunity_periods": opportunity_periods or ["No unusually supportive windows were surfaced from the current ruleset."],
     }

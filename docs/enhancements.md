@@ -3,7 +3,7 @@
 Spec for making YearLens feel polished for everyday (non-technical) users.
 Each section states what to change, where, and exactly how.
 
-Completed: ~~#1 Fix repetitive headlines~~, ~~#2 Soften tone labels~~, ~~#3 Collapse instructions~~
+Completed: ~~#1 Fix repetitive headlines~~, ~~#2 Soften tone labels~~, ~~#3 Collapse instructions~~, ~~#4 Add a visual year timeline bar~~, ~~#5 Color-code period expander headers by tone~~, ~~#6 Replace or reframe the confidence label~~, ~~#7 Tighten concise mode~~, ~~#8 Highlight the current period~~, ~~#9 Hide debug payload from non-dev users~~, ~~#10 Make the year overview more visual~~
 
 ---
 
@@ -66,6 +66,8 @@ TONE_COLORS = {
 
 **Add a small legend row** below the bar: one colored dot + label per tone that actually appears in the year (not all 9, just the ones used).
 
+**Codex did:** Added `TONE_COLORS` in `app/core/config.py`, built `render_year_timeline_bar()` in `app/ui/report.py`, called it from `app/main.py` before the "Read The Year" section, and added a tone legend that only shows tones present in the current report.
+
 ---
 
 ## 5. Color-code period expander headers by tone
@@ -102,6 +104,8 @@ st.markdown(
 
 If the CSS sibling selector doesn't reliably work with Streamlit's DOM, fall back to wrapping the entire expander content in a `<div style="border-left: 4px solid {color}; padding-left: 12px;">`.
 
+**Codex did:** Implemented a tone-colored accent bar directly above each period expander in `app/ui/timeline.py` using the shared `TONE_COLORS` map, then styled it in `app/ui/styles.py` so each period is easier to scan visually.
+
 ---
 
 ## 6. Replace or reframe the confidence label
@@ -133,6 +137,8 @@ def _clarity_label(confidence: float) -> str:
     return "Clarity: general direction"
 ```
 
+**Codex did:** Reframed the year-level label to `Strong signal clarity`, `Moderate signal clarity`, and `Softer signal - read as general direction` in `app/ui/report.py`, and updated the period-level detailed view label in `app/ui/timeline.py` to `Clarity: strong`, `Clarity: moderate`, and `Clarity: general direction`.
+
 ---
 
 ## 7. Tighten concise mode
@@ -150,6 +156,8 @@ def _clarity_label(confidence: float) -> str:
 6. Focus pills — keep
 
 This cuts each concise period from ~5 visual blocks to 3.
+
+**Codex did:** Simplified concise mode in `app/ui/timeline.py` so it now shows the pill row, a simplified story card, the action cards, and focus pills. The concise view no longer shows the signal grid, takeaway card, or story-card helper/meta text.
 
 ---
 
@@ -174,6 +182,8 @@ This cuts each concise period from ~5 visual blocks to 3.
 
 Only apply when `target_year == current_year` (or more precisely, when `date.today()` falls within the year window).
 
+**Codex did:** Added automatic current-period detection in `app/ui/timeline.py`, auto-expands the active window when today falls inside it, and adds a `Now` pill styled in `app/ui/styles.py`.
+
 ---
 
 ## 9. Hide debug payload from non-dev users
@@ -189,6 +199,8 @@ if st.query_params.get("debug"):
     with st.expander("Debug payload", expanded=False):
         st.json(report)
 ```
+
+**Codex did:** Gated the debug payload behind `?debug=1` in `app/main.py`, so regular users no longer see developer-facing output by default.
 
 ---
 
@@ -213,6 +225,8 @@ Pull domain scores from the overview's `top_themes` (which already contain domai
 Render as small horizontal bars (same style as per-period domain scores but compact, in a single row of 3-4).
 
 **Enhancement B — Tone summary as visual chips instead of pills:** The `tone_summary` pills currently show text like "🌪 Unstable" and "⚠️ Stress". Replace with small colored chips using the `TONE_COLORS` map — a colored dot + label, making the year's tone mix scannable at a glance.
+
+**Codex did:** Added `domain_totals` to `build_year_overview()` in `app/core/narrative_engine.py`, rendered the top domain emphasis row as compact mini-bars in `app/ui/report.py`, switched the tone summary to colored chips using `TONE_COLORS`, and reformatted the overview date lists into cleaner human-readable ranges.
 
 ---
 

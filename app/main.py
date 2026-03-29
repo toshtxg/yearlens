@@ -16,7 +16,7 @@ from app.core.narrative_engine import attach_narratives, build_year_overview
 from app.core.period_engine import build_periods
 from app.providers.template_narrative import TemplateNarrativeProvider
 from app.ui.form import render_input_form
-from app.ui.report import render_report_actions, render_year_overview
+from app.ui.report import render_report_actions, render_year_overview, render_year_timeline_bar
 from app.ui.styles import inject_global_styles
 from app.ui.timeline import render_period_timeline
 
@@ -108,6 +108,7 @@ def main() -> None:
         return
 
     render_year_overview(report["year_overview"], report["metadata"])
+    render_year_timeline_bar(report["periods"])
 
     st.markdown("<div class='yearlens-section-heading yearlens-section-heading-compact'>Read The Year</div>", unsafe_allow_html=True)
     mode = st.segmented_control(
@@ -121,8 +122,9 @@ def main() -> None:
     render_period_timeline(report["periods"], mode=(mode or "Concise").lower())
     render_report_actions(report)
 
-    with st.expander("Debug payload", expanded=False):
-        st.json(report)
+    if st.query_params.get("debug"):
+        with st.expander("Debug payload", expanded=False):
+            st.json(report)
 
 
 if __name__ == "__main__":
