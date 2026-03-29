@@ -13,6 +13,11 @@ def _render_list(items: list[str]) -> None:
     st.markdown(f"<ul class='yearlens-list'>{bullet_list}</ul>", unsafe_allow_html=True)
 
 
+def _render_section(title: str, items: list[str]) -> None:
+    st.markdown(f"<div class='yearlens-section-title'>{title}</div>", unsafe_allow_html=True)
+    _render_list(items)
+
+
 def render_period_timeline(periods: list[dict], mode: str) -> None:
     st.subheader("Period Timeline")
 
@@ -33,20 +38,18 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
 
             st.write(period["concise_text"] if mode == "concise" else period["detailed_text"])
 
-            st.markdown("**In This Window**")
-            _render_list(period["period_guidance"])
+            _render_section("In This Window", period["period_guidance"])
 
-            st.markdown("**Domain Scores**")
-            _render_list(
+            _render_section(
+                "Domain Scores",
                 [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}: {period['domains'][domain]}/10" for domain in period["top_domains"]]
             )
 
-            st.markdown("**Advice**")
-            _render_list([f"💡 {advice}" for advice in period["advice"]])
+            _render_section("Advice", [f"💡 {advice}" for advice in period["advice"]])
 
             if mode == "detailed":
-                st.markdown("**Drivers**")
-                _render_list(
+                _render_section(
+                    "Drivers",
                     [
                         f"🪐 {driver['planet']} {driver['event_type']} in {driver['sign'] or 'current sign'} / house {driver['house']}: {driver['combined_effect']}"
                         for driver in period["drivers"]

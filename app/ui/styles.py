@@ -97,7 +97,7 @@ def inject_global_styles() -> None:
             display: flex;
             flex-wrap: wrap;
             gap: 0.45rem;
-            margin: 0.35rem 0 0.75rem 0;
+            margin: 0.2rem 0 0.45rem 0;
         }
 
         .yearlens-pill {
@@ -115,17 +115,19 @@ def inject_global_styles() -> None:
             font-size: 0.95rem;
             font-weight: 700;
             color: #1f2937;
-            margin-top: 0.65rem;
-            margin-bottom: 0.3rem;
+            margin-top: 0.32rem;
+            margin-bottom: 0.08rem;
+            line-height: 1.2;
         }
 
         .yearlens-list {
-            margin: 0.05rem 0 0.2rem 0;
+            margin: 0 0 0.1rem 0;
             padding-left: 1.1rem;
         }
 
         .yearlens-list li {
-            margin: 0.16rem 0;
+            margin: 0.08rem 0;
+            line-height: 1.35;
         }
 
         @media (max-width: 640px) {
