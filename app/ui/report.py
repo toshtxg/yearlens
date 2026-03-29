@@ -27,14 +27,6 @@ def _render_list_card(title: str, items: list[str], card_class: str = "", card_k
     )
 
 
-def _year_signal_label(confidence: float) -> str:
-    if confidence >= 0.8:
-        return "Strong signal clarity"
-    if confidence >= 0.68:
-        return "Moderate signal clarity"
-    return "Softer signal - read as general direction"
-
-
 def _render_period_item(item: str) -> str:
     if " · " not in item or " to " not in item:
         return f"<li>{escape(item)}</li>"
@@ -181,7 +173,6 @@ def render_year_overview(overview: dict, metadata: dict) -> None:
             <div class="yearlens-overview-meta">
                 <span>{escape(window_text)}</span>
                 <span>{escape(anchor_label)}</span>
-                <span>{escape(_year_signal_label(overview["confidence"]))}</span>
             </div>
         </div>
         """,
