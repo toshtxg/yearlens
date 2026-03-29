@@ -73,3 +73,4 @@ def test_build_year_overview_returns_visual_summary_data() -> None:
     assert overview["tone_summary"][0]["tone"] in {"stressful", "supportive"}
     assert overview["domain_totals"]["career_work"] == 6.5
     assert overview["top_caution_periods"]
+    assert "career / work and study / growth" in overview["summary"].lower()
