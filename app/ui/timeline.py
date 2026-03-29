@@ -13,6 +13,7 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
             metrics[0].metric("Tone", period["tone"].title())
             metrics[1].metric("Confidence", f"{period['confidence']:.0%}")
             metrics[2].metric("Primary focus", DOMAIN_LABELS[period["top_domains"][0]])
+            st.caption(period["driver_summary"])
 
             st.write(period["concise_text"] if mode == "concise" else period["detailed_text"])
 
@@ -28,6 +29,5 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
                 st.markdown("**Drivers**")
                 for driver in period["drivers"]:
                     st.write(
-                        f"- {driver['planet']} in house {driver['house']}: {driver['combined_effect']}"
+                        f"- {driver['planet']} {driver['event_type']} in {driver['sign'] or 'current sign'} / house {driver['house']}: {driver['combined_effect']}"
                     )
-

@@ -17,7 +17,7 @@ from app.ui.timeline import render_period_timeline
 def generate_report(user_input: UserInput) -> dict:
     window_start, window_end = get_year_window(user_input)
     natal_chart = build_natal_chart(user_input)
-    change_points = build_year_change_points(user_input, window_start, window_end)
+    change_points = build_year_change_points(user_input, natal_chart, window_start, window_end)
     periods = build_periods(window_start, window_end, change_points)
     structured_periods = build_period_meanings(periods, natal_chart)
     provider = TemplateNarrativeProvider()
@@ -27,7 +27,7 @@ def generate_report(user_input: UserInput) -> dict:
         "year_overview": build_year_overview(period_payload),
         "periods": period_payload,
         "metadata": {
-            "engine_mode": "placeholder",
+            "engine_mode": natal_chart["engine_mode"],
             "input_snapshot": user_input.model_dump(mode="json"),
             "window_start": window_start.isoformat(),
             "window_end": window_end.isoformat(),
@@ -41,8 +41,8 @@ def main() -> None:
     st.set_page_config(page_title="YearLens", page_icon="🔭", layout="wide")
     st.title("YearLens")
     st.caption(
-        "Streamlit-first scaffold for a yearly reading app. "
-        "The current astrology layer is deterministic placeholder logic until Swiss Ephemeris is wired in."
+        "Milestone 2 build using Swiss Ephemeris-backed calculations, whole-sign houses, "
+        "and rule-based interpretations. Manual coordinates/timezone can override geocoding when needed."
     )
 
     payload = render_input_form()
@@ -54,11 +54,14 @@ def main() -> None:
             st.error("Input validation failed. Fix the highlighted values and try again.")
             st.code(json.dumps(exc.errors(), indent=2))
         else:
-            st.session_state["yearlens_report"] = generate_report(user_input)
+            try:
+                st.session_state["yearlens_report"] = generate_report(user_input)
+            except Exception as exc:
+                st.error(f"Report generation failed: {exc}")
 
     report = st.session_state.get("yearlens_report")
     if not report:
-        st.info("Submit the form to generate a scaffolded report flow.")
+        st.info("Submit the form to generate a real YearLens report. Manual latitude/longitude/timezone overrides are available under Advanced settings.")
         return
 
     render_report_actions(report)
@@ -73,4 +76,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

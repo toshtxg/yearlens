@@ -51,6 +51,12 @@ In scope for the first real implementation:
 - concise and detailed text from the same structured object
 - local JSON persistence or no persistence
 
+Current status:
+
+- the repo now has a real `swisseph`-backed natal and transit pipeline
+- location resolution supports both geocoding and manual coordinate overrides
+- the meaning engine is still intentionally lightweight and is the next place to deepen
+
 Deferred from V1:
 
 - OCR note ingestion
@@ -74,18 +80,19 @@ The research flags Swiss Ephemeris licensing as architecture-shaping. Before wir
 
 Swiss Ephemeris does not resolve local time zones for you. Historical timezone conversion needs an explicit IANA tzdb-backed layer when the real astrology engine is implemented.
 
-## Scaffold Caveat
+## Milestone 2 Caveat
 
-`app/core/astro_engine.py` currently contains a deterministic placeholder engine, not real astrology. That is deliberate:
+`app/core/astro_engine.py` now performs real calculations through the Swiss Ephemeris wrapper, but the default local setup may still use the Moshier fallback unless ephemeris files are provided through `SWISSEPH_EPHE_PATH`.
 
-- it unblocks app structure and report flow now
-- it makes milestone ownership explicit
-- it keeps replacement scope isolated to one module later
+That is acceptable for the initial Milestone 2 build because:
+
+- it gives deterministic real chart math immediately
+- it keeps local setup simple
+- it preserves a clean upgrade path to full Swiss ephemeris files later
 
 ## Replacement Map
 
-- replace `app/core/astro_engine.py` with Swiss Ephemeris-backed calculations
-- keep `app/core/period_engine.py` and tighten change-point logic once real events exist
+- deepen `app/core/period_engine.py` boundary weighting as more real event types are added
 - expand `app/core/meaning_engine.py` with richer planet, house, and transit rules
 - optionally wire `app/providers/llm_narrative.py` after template output is stable
-
+- optionally add true Swiss ephemeris files via `SWISSEPH_EPHE_PATH` for higher-fidelity production runs

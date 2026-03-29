@@ -56,7 +56,8 @@ def build_periods(
 
         periods.append(candidate)
 
-    return _split_long_periods(periods, config.max_segment_days)
+    split_periods = _split_long_periods(periods, config.max_segment_days)
+    return _compress_periods(split_periods, config.target_segment_count)
 
 
 def _split_long_periods(periods: list[PeriodWindow], max_segment_days: int) -> list[PeriodWindow]:
@@ -90,3 +91,35 @@ def _split_long_periods(periods: list[PeriodWindow], max_segment_days: int) -> l
 
     return final_periods
 
+
+def _compress_periods(periods: list[PeriodWindow], target_segment_count: int) -> list[PeriodWindow]:
+    if len(periods) <= target_segment_count:
+        return periods
+
+    compressed = list(periods)
+    while len(compressed) > target_segment_count:
+        shortest_index = min(range(len(compressed)), key=lambda idx: compressed[idx].duration_days)
+
+        if shortest_index == 0:
+            merge_index = 0
+        elif shortest_index == len(compressed) - 1:
+            merge_index = shortest_index - 1
+        else:
+            left_days = compressed[shortest_index - 1].duration_days
+            right_days = compressed[shortest_index + 1].duration_days
+            merge_index = shortest_index - 1 if left_days <= right_days else shortest_index
+
+        left = compressed[merge_index]
+        right = compressed[merge_index + 1]
+        merged = PeriodWindow(
+            id=left.id,
+            start_date=left.start_date,
+            end_date=right.end_date,
+            drivers=sorted(left.drivers + right.drivers, key=lambda item: (item.date, item.intensity)),
+        )
+        compressed = compressed[:merge_index] + [merged] + compressed[merge_index + 2 :]
+
+    for index, period in enumerate(compressed, start=1):
+        period.id = f"p{index}"
+
+    return compressed

@@ -10,17 +10,24 @@ Last updated: 2026-03-28
 - [x] Scaffolded the repo layout under `app/`, `docs/`, and `sql/`
 - [x] Added a runnable Streamlit entrypoint
 - [x] Added input validation with explicit defaults
-- [x] Added placeholder astrology, period, meaning, and narrative modules
+- [x] Added modular astrology, period, meaning, and narrative modules
 - [x] Added local storage abstraction and Supabase schema starter
 - [x] Added repo-level context and implementation docs
+- [x] Installed local runtime dependencies in `venv`
+- [x] Replaced placeholder chart math with a real `swisseph`-backed engine
+- [x] Added manual latitude, longitude, and timezone overrides
+- [x] Added real yearly change points from ingresses, stations, and eclipses
+- [x] Updated the GitHub-facing README to match the current implementation
+- [x] Verified the test suite passes locally
+- [x] Verified the Streamlit app boots locally
 
 ## In Progress
 
-- [ ] Replace placeholder astrology with Swiss Ephemeris-backed logic
-- [ ] Refine change-point generation using real transit events
-- [ ] Tighten period segmentation toward the PRD target of 8 to 18 meaningful windows
+- [ ] Deepen meaning rules beyond the current starter mappings
+- [ ] Refine change-point weighting so segment boundaries feel more practitioner-like
+- [ ] Tighten period segmentation further using driver intensity rather than only date spacing
 - [ ] Expand rules for planets, houses, nodes, and transit modifiers
-- [ ] Improve confidence scoring beyond placeholder heuristics
+- [ ] Improve confidence scoring beyond the current starter heuristics
 
 ## Later
 
@@ -33,6 +40,6 @@ Last updated: 2026-03-28
 ## Open Decisions
 
 - [ ] Confirm Swiss Ephemeris licensing path for the intended deployment model
+- [ ] Decide whether to provision local Swiss ephemeris files or accept the Moshier fallback for early testing
 - [ ] Decide whether V1 needs persistence or can stay stateless
 - [ ] Decide whether V1 is birthday-anchored only or also supports calendar-year mode prominently in the UI
-

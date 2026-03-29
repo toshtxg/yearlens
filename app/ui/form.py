@@ -22,6 +22,13 @@ def render_input_form() -> dict | None:
             ayanamsa = st.selectbox("Ayanamsa", ["lahiri"], index=0)
             house_system = st.selectbox("House system", ["whole_sign"], index=0)
             node_type = st.selectbox("Node type", ["true", "mean"], index=0)
+            coord_col, tz_col = st.columns(2)
+            with coord_col:
+                birth_latitude = st.text_input("Latitude override", value="", placeholder="e.g. 1.3521")
+                birth_longitude = st.text_input("Longitude override", value="", placeholder="e.g. 103.8198")
+            with tz_col:
+                timezone_id = st.text_input("Timezone override", value="", placeholder="e.g. Asia/Singapore")
+                st.caption("Optional. Use manual coordinates/timezone to bypass geocoding when needed.")
 
         submitted = st.form_submit_button("Generate Reading", use_container_width=True)
 
@@ -32,6 +39,9 @@ def render_input_form() -> dict | None:
         "birth_date": birth_date,
         "birth_time": birth_time,
         "birth_location": birth_location,
+        "birth_latitude": birth_latitude or None,
+        "birth_longitude": birth_longitude or None,
+        "timezone_id": timezone_id or None,
         "target_year": target_year,
         "name": name or None,
         "year_anchor": year_anchor,
@@ -42,4 +52,3 @@ def render_input_form() -> dict | None:
             "node_type": node_type,
         },
     }
-

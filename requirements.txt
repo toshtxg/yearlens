@@ -1,6 +1,9 @@
-streamlit>=1.30.0
-pydantic>=2.7.0
-python-dotenv>=1.0.0
-supabase>=2.4.0
-pytest>=8.0.0
-
+streamlit>=1.55.0
+pydantic>=2.12.5
+python-dotenv>=1.2.2
+supabase>=2.28.3
+pytest>=9.0.2
+geopy>=2.4.1
+timezonefinder>=8.2.1
+pysweph>=2.10.3.6
+tzdata>=2025.3

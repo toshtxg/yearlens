@@ -87,11 +87,12 @@ Definition of done:
 
 ## Current Intent
 
-The current scaffold is meant to be the starting line for Milestone 1, not the final product. The immediate next coding pass should focus on:
+The current repo is beyond the original scaffold and has entered Milestone 2. The immediate next coding pass should focus on:
 
-1. replacing the placeholder astrology module
-2. enriching the rule engine with the actual interpretation mappings
+1. enriching the rule engine with actual interpretation mappings
+2. improving event weighting and confidence reporting
 3. deciding whether persistence is needed before launch
+4. deciding whether to ship with Moshier fallback or provision Swiss ephemeris files
 
 ## Practical Guardrails
 
@@ -99,4 +100,3 @@ The current scaffold is meant to be the starting line for Milestone 1, not the f
 - do not introduce external services before the deterministic pipeline is stable
 - avoid making the LLM responsible for math or scoring
 - keep report objects structured so they can be saved and re-rendered later
-

@@ -15,16 +15,16 @@ def build_period_meanings(periods: list[PeriodWindow], natal_chart: dict) -> lis
     payload: list[dict] = []
 
     for period in periods:
-        driver = period.drivers[0] if period.drivers else None
+        driver = _dominant_driver(period.drivers)
         planet = driver.planet if driver else "Saturn"
-        house = _house_for_planet(natal_chart, planet)
-        tone = TONE_BY_PLANET.get(planet, "mixed")
+        house = driver.house if driver and driver.house is not None else _house_for_planet(natal_chart, planet)
+        tone = _tone_for_driver(driver)
         scores = {domain: 3 for domain in DOMAINS}
 
         for domain in HOUSE_DOMAIN_MAP.get(house, []):
             scores[domain] = min(10, scores[domain] + 4)
 
-        if tone in {"stressful", "serious", "volatile"}:
+        if tone in {"stressful", "serious", "volatile", "reflective"}:
             scores["health_emotional"] = min(10, scores["health_emotional"] + 1)
         if tone in {"constructive", "expansive", "supportive"}:
             scores["study_growth"] = min(10, scores["study_growth"] + 1)
@@ -34,9 +34,12 @@ def build_period_meanings(periods: list[PeriodWindow], natal_chart: dict) -> lis
         driver_payload = {
             "planet": planet,
             "house": house,
+            "sign": driver.sign if driver else None,
+            "event_type": driver.event_type if driver else "fallback",
+            "summary": driver.summary if driver else "Fallback driver used because no major transit event was attached to this period.",
             "planet_meaning": ", ".join(PLANET_MEANINGS[planet][:2]),
             "house_meaning": ", ".join(HOUSE_MEANINGS[house][:2]),
-            "combined_effect": _combined_effect(planet, house, tone),
+            "combined_effect": _combined_effect(planet, house, tone, driver),
         }
 
         payload.append(
@@ -49,6 +52,7 @@ def build_period_meanings(periods: list[PeriodWindow], natal_chart: dict) -> lis
                 "advice": advice,
                 "drivers": [driver_payload],
                 "top_domains": top_domains,
+                "driver_summary": driver_payload["summary"],
                 "confidence": round(_confidence_score(period), 2),
             }
         )
@@ -76,15 +80,36 @@ def _build_advice(tone: str, top_domains: list[str]) -> list[str]:
     return advice[:3]
 
 
-def _combined_effect(planet: str, house: int, tone: str) -> str:
+def _combined_effect(planet: str, house: int, tone: str, driver) -> str:
     planet_terms = ", ".join(PLANET_MEANINGS[planet][:2])
     house_terms = ", ".join(HOUSE_MEANINGS[house][:2])
-    return f"{planet} themes around {planet_terms} concentrate through house {house} matters like {house_terms}, creating a {tone} period."
+    sign_clause = f" in {driver.sign}" if driver and driver.sign else ""
+    event_clause = f" during this {driver.event_type}" if driver else ""
+    return (
+        f"{planet}{sign_clause} themes around {planet_terms} concentrate through house {house} matters like "
+        f"{house_terms}{event_clause}, creating a {tone} period."
+    )
+
+
+def _dominant_driver(drivers) -> object | None:
+    if not drivers:
+        return None
+    return max(drivers, key=lambda driver: (driver.intensity, driver.date.toordinal()))
+
+
+def _tone_for_driver(driver) -> str:
+    if driver is None:
+        return "mixed"
+    if driver.event_type == "eclipse":
+        return "volatile"
+    if driver.event_type == "station" and driver.motion == "retrograde":
+        return "reflective" if driver.planet in {"Mercury", "Venus"} else "serious"
+    return TONE_BY_PLANET.get(driver.planet, "mixed")
 
 
 def _confidence_score(period: PeriodWindow) -> float:
-    base = 0.62
-    driver_bonus = min(0.16, len(period.drivers) * 0.03)
+    base = 0.7
+    strongest_driver = max((driver.intensity for driver in period.drivers), default=1)
+    driver_bonus = min(0.16, strongest_driver * 0.03)
     duration_penalty = 0.0 if period.duration_days <= 45 else 0.04
     return max(0.55, base + driver_bonus - duration_penalty)
-
