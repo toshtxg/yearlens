@@ -9,7 +9,31 @@ def render_input_form() -> dict | None:
 
         with left:
             birth_date = st.date_input("Birth date", value=date(1990, 1, 1))
-            birth_time = st.time_input("Birth time", value=time(12, 0))
+            st.markdown("**Birth time**")
+            time_col_1, time_col_2 = st.columns(2)
+            with time_col_1:
+                birth_hour = int(
+                    st.number_input(
+                        "Hour",
+                        min_value=0,
+                        max_value=23,
+                        value=12,
+                        step=1,
+                        help="24-hour format.",
+                    )
+                )
+            with time_col_2:
+                birth_minute = int(
+                    st.number_input(
+                        "Minute",
+                        min_value=0,
+                        max_value=59,
+                        value=0,
+                        step=1,
+                    )
+                )
+            birth_time = time(birth_hour, birth_minute)
+            st.caption("Enter birth time as exact hour and minute when known.")
             birth_location = st.text_input("Birth location", value="Singapore")
 
         with right:
