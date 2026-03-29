@@ -48,10 +48,14 @@ def generate_report(user_input: UserInput) -> dict:
 def main() -> None:
     st.set_page_config(page_title="YearLens", page_icon="🔭", layout="wide")
     inject_global_styles()
-    st.title("YearLens")
-    st.caption(
-        "Milestone 2 build using Swiss Ephemeris-backed calculations, whole-sign houses, "
-        "and rule-based interpretations. Manual coordinates/timezone can override geocoding when needed."
+    st.markdown(
+        """
+        <div class="yearlens-hero">
+            <h1>YearLens</h1>
+            <p>Personal year reading app using Swiss Ephemeris-backed calculations, whole-sign houses, and rule-based interpretations.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     payload = render_input_form()

@@ -5,7 +5,12 @@ import streamlit as st
 
 def render_input_form() -> dict | None:
     with st.form("yearlens-input"):
-        birth_date = st.date_input("Birth date", value=date(1990, 1, 1))
+        date_year_col, name_col = st.columns([1, 1])
+        with date_year_col:
+            birth_date = st.date_input("Birth date", value=date(1990, 1, 1))
+        with name_col:
+            target_year = int(st.number_input("Target year", min_value=1900, max_value=2100, value=date.today().year, step=1))
+
         st.markdown("**Birth time**")
         time_col_1, time_col_2 = st.columns(2)
         with time_col_1:
@@ -31,9 +36,9 @@ def render_input_form() -> dict | None:
             )
         birth_time = time(birth_hour, birth_minute)
         st.caption("Enter birth time as exact hour and minute when known.")
+
         birth_location = st.text_input("Birth location", value="Singapore")
-        target_year = int(st.number_input("Target year", min_value=1900, max_value=2100, value=date.today().year, step=1))
-        name = st.text_input("Display name", value="")
+        name = st.text_input("Display name", value="", placeholder="Optional")
         year_anchor = st.selectbox("Year anchor", ["birthday", "calendar"], index=0)
         if birth_date.month == 1 and birth_date.day == 1:
             st.caption("Your birthday is January 1, so `birthday` and `calendar` will produce the same 2026 window.")
