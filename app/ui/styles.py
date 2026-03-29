@@ -8,6 +8,7 @@ def inject_global_styles() -> None:
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap');
 
         :root {
+            --yl-header-offset: 4.4rem;
             --yl-bg: #0b1120;
             --yl-bg-soft: #10192c;
             --yl-surface: rgba(16, 24, 40, 0.82);
@@ -43,7 +44,7 @@ def inject_global_styles() -> None:
 
         .block-container {
             max-width: 920px;
-            padding-top: 0.9rem;
+            padding-top: calc(var(--yl-header-offset) + 0.9rem);
             padding-bottom: 2rem;
             padding-left: 1rem;
             padding-right: 1rem;
@@ -760,6 +761,10 @@ def inject_global_styles() -> None:
         }
 
         @media (max-width: 700px) {
+            :root {
+                --yl-header-offset: 3.9rem;
+            }
+
             .block-container {
                 max-width: 100%;
                 padding-left: 0.82rem;
