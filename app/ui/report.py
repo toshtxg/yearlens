@@ -43,6 +43,8 @@ def render_year_overview(overview: dict, metadata: dict) -> None:
     )
 
     st.write(overview["summary"])
+    if overview.get("master_signals"):
+        _render_list("Master-Style Read", overview["master_signals"])
     _render_list("Top Themes", overview["top_themes"])
     _render_list("Top Caution Periods", overview["top_caution_periods"])
     _render_list("Top Opportunity Periods", overview["top_opportunity_periods"])

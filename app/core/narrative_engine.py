@@ -59,11 +59,37 @@ def build_year_overview(periods: list[dict]) -> dict:
         tone_mix[period["tone"]] += 1
     top_tones = sorted(tone_mix, key=tone_mix.get, reverse=True)[:2]
 
+    master_signals = []
+    good_decision_windows = _period_ranges(periods, lambda item: item["signals"]["decision_timing"]["status"] == "good")
+    caution_decision_windows = _period_ranges(periods, lambda item: item["signals"]["decision_timing"]["status"] == "caution")
+    backstabber_windows = _period_ranges(periods, lambda item: item["signals"]["backstabbers"]["level"] == "high")
+    relationship_windows = _period_ranges(periods, lambda item: item["signals"]["relationships"]["level"] == "high")
+    money_windows = _period_ranges(periods, lambda item: item["signals"]["money"]["level"] == "high")
+    health_windows = _period_ranges(periods, lambda item: item["signals"]["health"]["level"] == "high")
+
+    if good_decision_windows:
+        master_signals.append(f"🧭 Good time for important decisions: {', '.join(good_decision_windows)}")
+    if caution_decision_windows:
+        master_signals.append(f"⏸️ Hold off on big decisions: {', '.join(caution_decision_windows)}")
+    if backstabber_windows:
+        master_signals.append(f"🕵️ Be careful of backstabbers / politics: {', '.join(backstabber_windows)}")
+    if relationship_windows:
+        master_signals.append(f"❤️ Be careful in relationships: {', '.join(relationship_windows)}")
+    if money_windows:
+        master_signals.append(f"💰 Be careful about money: {', '.join(money_windows)}")
+    if health_windows:
+        master_signals.append(f"🩺 Be careful about health: {', '.join(health_windows)}")
+
     return {
         "summary": summary,
         "top_themes": top_themes,
         "tone_summary": [f"{TONE_UI[tone]['emoji']} {TONE_UI[tone]['label']}" for tone in top_tones],
+        "master_signals": master_signals,
         "confidence": round(mean(period["confidence"] for period in periods), 2),
         "top_caution_periods": caution_periods or ["No major caution periods flagged in the placeholder model."],
         "top_opportunity_periods": opportunity_periods or ["No major opportunity periods flagged in the placeholder model."],
     }
+
+
+def _period_ranges(periods: list[dict], predicate, limit: int = 2) -> list[str]:
+    return [f"{period['start_date']} to {period['end_date']}" for period in periods if predicate(period)][:limit]

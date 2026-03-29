@@ -127,6 +127,14 @@ TONE_UI = {
     "reflective": {"label": "Slow Down", "emoji": "🛋️", "description": "review, rest, and reset"},
 }
 
+SIGNAL_UI = {
+    "decision_timing": {"label": "Decision Timing", "emoji": "🧭"},
+    "backstabbers": {"label": "Politics / Backstabbers", "emoji": "🕵️"},
+    "relationships": {"label": "Relationships", "emoji": "❤️"},
+    "money": {"label": "Money", "emoji": "💰"},
+    "health": {"label": "Health", "emoji": "🩺"},
+}
+
 
 @dataclass(frozen=True)
 class SegmentConfig:

@@ -33,9 +33,26 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
 
             st.write(period["concise_text"] if mode == "concise" else period["detailed_text"])
 
+            st.markdown("**Quick Read**")
+            _render_list(period["quick_read"])
+
             st.markdown("**Domain Scores**")
             _render_list(
                 [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}: {period['domains'][domain]}/10" for domain in period["top_domains"]]
+            )
+
+            st.markdown("**Master Signals**")
+            _render_list(
+                [
+                    f"{signal['emoji']} {signal['label']}: {signal.get('short_text')}"
+                    for signal in [
+                        period["signals"]["decision_timing"],
+                        period["signals"]["backstabbers"],
+                        period["signals"]["relationships"],
+                        period["signals"]["money"],
+                        period["signals"]["health"],
+                    ]
+                ]
             )
 
             st.markdown("**Advice**")
