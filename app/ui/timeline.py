@@ -138,7 +138,7 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
     for index, period in enumerate(periods):
         tone_meta = TONE_UI[period["tone"]]
         primary_domain = period["top_domains"][0]
-        header = f"{tone_meta['emoji']} {period['headline']}"
+        header = f"{tone_meta['emoji']} {_pretty_header_range(period['start_date'], period['end_date'])} · {period['headline']}"
 
         with st.expander(header, expanded=(mode == "concise" and index == 0)):
             header_pills = [
@@ -187,4 +187,14 @@ def _pretty_date_range(start_value: str, end_value: str) -> str:
         if start.month == end.month:
             return f"{start.strftime('%b')} {start.day} to {end.day}, {start.year}"
         return f"{start.strftime('%b')} {start.day} to {end.strftime('%b')} {end.day}, {start.year}"
+    return f"{start.strftime('%b')} {start.day}, {start.year} to {end.strftime('%b')} {end.day}, {end.year}"
+
+
+def _pretty_header_range(start_value: str, end_value: str) -> str:
+    start = date.fromisoformat(start_value)
+    end = date.fromisoformat(end_value)
+    if start.year == end.year:
+        if start.month == end.month:
+            return f"{start.strftime('%b')} {start.day} to {end.day}"
+        return f"{start.strftime('%b')} {start.day} to {end.strftime('%b')} {end.day}"
     return f"{start.strftime('%b')} {start.day}, {start.year} to {end.strftime('%b')} {end.day}, {end.year}"
