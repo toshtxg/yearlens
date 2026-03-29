@@ -13,7 +13,7 @@ def render_input_form() -> dict | None:
         with name_col:
             target_year = int(
                 st.selectbox(
-                    "Target year",
+                    "Year to read",
                     options=year_options,
                     index=year_options.index(current_year),
                 )
@@ -26,20 +26,24 @@ def render_input_form() -> dict | None:
         with time_col_2:
             birth_minute = int(st.selectbox("Minute", options=list(range(60)), index=0))
         birth_time = time(birth_hour, birth_minute)
-        st.caption("Enter birth time as exactly as you know it. House-based reading quality depends on this.")
+        st.caption("Use the most exact birth time you know. It helps the reading land more precisely.")
 
         birth_location = st.text_input("Birth location", value="Singapore")
-        name = st.text_input("Display name", value="", placeholder="Optional")
-        year_anchor = st.selectbox("Year anchor", ["birthday", "calendar"], index=0)
+        cycle_options = {
+            "Birthday cycle": "birthday",
+            "Calendar year": "calendar",
+        }
+        selected_cycle = st.selectbox("Reading cycle", list(cycle_options), index=0)
+        year_anchor = cycle_options[selected_cycle]
         if birth_date.month == 1 and birth_date.day == 1:
-            st.caption("Your birthday is January 1, so `birthday` and `calendar` will produce the same 2026 window.")
+            st.caption(f"Your birthday is January 1, so birthday cycle and calendar year produce the same {target_year} window.")
         else:
             st.caption(
-                "`birthday` uses your personal 12-month cycle starting on your birthday. "
-                "`calendar` uses January 1 to December 31."
+                "Birthday cycle follows your personal year from birthday to birthday. "
+                "Calendar year follows January through December."
             )
 
-        with st.expander("Advanced settings"):
+        with st.expander("Location overrides and advanced options"):
             zodiac = st.selectbox("Zodiac", ["sidereal"], index=0)
             ayanamsa = st.selectbox("Ayanamsa", ["lahiri"], index=0)
             house_system = st.selectbox("House system", ["whole_sign"], index=0)
@@ -47,7 +51,8 @@ def render_input_form() -> dict | None:
             birth_latitude = st.text_input("Latitude override", value="", placeholder="e.g. 1.3521")
             birth_longitude = st.text_input("Longitude override", value="", placeholder="e.g. 103.8198")
             timezone_id = st.text_input("Timezone override", value="", placeholder="e.g. Asia/Singapore")
-            st.caption("Optional. Use manual coordinates/timezone to bypass geocoding, improve repeatability, and avoid sending the place name to the geocoder.")
+            name = st.text_input("Display name", value="", placeholder="Optional")
+            st.caption("Manual coordinates and timezone let you bypass place-name lookup for more repeatable results and better privacy.")
 
         submitted = st.form_submit_button("Generate Reading", use_container_width=True)
 

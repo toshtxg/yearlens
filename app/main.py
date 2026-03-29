@@ -50,42 +50,45 @@ def main() -> None:
     inject_global_styles()
     st.markdown(
         """
-        <div class="yearlens-hero">
-            <h1>YearLens</h1>
-            <p>YearLens turns your birth details into a structured year reading with clearer windows, plain-language guidance, and a softer explanation of what the astrology is actually pointing to.</p>
+        <div class="yearlens-hero-shell">
+            <div class="yearlens-eyebrow">Year Reading Companion</div>
+            <div class="yearlens-hero">
+                <h1>YearLens</h1>
+                <p>A calmer way to read the year ahead: clear windows, plain-language themes, and softer guidance built from your birth details without making the experience feel like a technical dashboard.</p>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    st.markdown(
-        """
-        <div class="yearlens-card">
-            <div class="yearlens-section-title">How To Use This</div>
-            <ul class="yearlens-list">
-                <li>Enter your birth date, exact birth hour and minute, location, and the target year.</li>
-                <li>Use <strong>birthday</strong> for a personal birthday-to-birthday cycle, or <strong>calendar</strong> for January to December.</li>
-                <li>Read the timeline period by period. Start with the headline and plain-English summary, then open detailed mode if you want to see how the signs, houses, and transits were translated.</li>
-                <li>If geocoding is unreliable, use the manual latitude, longitude, and timezone overrides in <strong>Advanced settings</strong>.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        """
-        <div class="yearlens-card">
-            <div class="yearlens-section-title">Disclaimer And Data Handling</div>
-            <ul class="yearlens-list">
-                <li>This app is for reflection and personal guidance, not certainty or guaranteed prediction.</li>
-                <li>Do not use it as the sole basis for medical, legal, financial, or relationship decisions.</li>
-                <li>This build keeps the generated report in the current session and does not write it to a database or report file by default.</li>
-                <li>If you enter a place name instead of manual coordinates, that location text may be sent to the geocoder to resolve latitude and longitude before timezone lookup happens locally.</li>
-                <li>Treat the output as prompts for judgment and self-awareness, especially when the app says a period looks cleaner or more sensitive.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    intro_col, note_col = st.columns([1.2, 1], gap="small")
+    with intro_col:
+        st.markdown(
+            """
+            <div class="yearlens-note-card">
+                <div class="yearlens-note-title">How To Use It</div>
+                <ul class="yearlens-note-list">
+                    <li>Enter your birth details and the year you want to explore.</li>
+                    <li>Read one period at a time instead of trying to absorb the whole year at once.</li>
+                    <li>Start in concise mode, then open detailed mode only when you want the deeper reasoning.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with note_col:
+        st.markdown(
+            """
+            <div class="yearlens-note-card yearlens-note-card-muted">
+                <div class="yearlens-note-title">Keep In Mind</div>
+                <ul class="yearlens-note-list">
+                    <li>Treat the reading like guidance for reflection and timing, not certainty.</li>
+                    <li>Exact birth time makes the reading more specific, especially around houses.</li>
+                    <li>If location lookup is shaky, manual coordinates give a cleaner fallback.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     payload = render_input_form()
 
@@ -106,16 +109,32 @@ def main() -> None:
 
     report = st.session_state.get("yearlens_report")
     if not report:
-        st.info("Submit the form to generate a real YearLens report. Manual latitude/longitude/timezone overrides are available under Advanced settings.")
+        st.markdown(
+            """
+            <div class="yearlens-placeholder-card">
+                <div class="yearlens-placeholder-title">Generate your reading</div>
+                <div class="yearlens-placeholder-copy">Submit the form to build a full YearLens report. If place-name lookup is unreliable, use the manual latitude, longitude, and timezone fields under advanced options.</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         return
 
-    render_report_actions(report)
     render_year_overview(report["year_overview"], report["metadata"])
 
-    mode = st.radio("Reading mode", ["concise", "detailed"], horizontal=True)
-    render_period_timeline(report["periods"], mode=mode)
+    st.markdown("<div class='yearlens-section-heading yearlens-section-heading-compact'>Read The Year</div>", unsafe_allow_html=True)
+    mode = st.segmented_control(
+        "Reading mode",
+        options=["Concise", "Detailed"],
+        default="Concise",
+        selection_mode="single",
+        width="content",
+        label_visibility="collapsed",
+    )
+    render_period_timeline(report["periods"], mode=(mode or "Concise").lower())
+    render_report_actions(report)
 
-    with st.expander("Debug payload"):
+    with st.expander("Debug payload", expanded=False):
         st.json(report)
 
 
