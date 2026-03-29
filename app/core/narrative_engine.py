@@ -1,32 +1,27 @@
 from statistics import mean
 from typing import Protocol
 
-from app.core.config import DOMAINS, DOMAIN_EMOJIS, get_domain_labels, get_tone_ui
-from app.core.meaning_strings import YEAR_OVERVIEW
+from app.core.config import DOMAINS, DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_UI
 
 
 class NarrativeProvider(Protocol):
-    def generate(self, period_data: dict, lang: str = "en") -> dict:
+    def generate(self, period_data: dict) -> dict:
         ...
 
 
-def attach_narratives(periods: list[dict], provider: NarrativeProvider, lang: str = "en") -> list[dict]:
+def attach_narratives(periods: list[dict], provider: NarrativeProvider) -> list[dict]:
     payload: list[dict] = []
 
     for period in periods:
         item = dict(period)
-        item.update(provider.generate(item, lang))
+        item.update(provider.generate(item))
         payload.append(item)
 
     return payload
 
 
-def build_year_overview(periods: list[dict], lang: str = "en") -> dict:
-    domain_labels = get_domain_labels(lang)
-    tone_ui = get_tone_ui(lang)
-    overview_text = YEAR_OVERVIEW[lang]
-
-    aggregate = {key: 0 for key in domain_labels}
+def build_year_overview(periods: list[dict]) -> dict:
+    aggregate = {key: 0 for key in DOMAIN_LABELS}
     for period in periods:
         for key, value in period["domains"].items():
             aggregate[key] += value
@@ -36,16 +31,13 @@ def build_year_overview(periods: list[dict], lang: str = "en") -> dict:
     supportive = sum(1 for period in periods if period["tone"] in {"supportive", "constructive", "expansive"})
 
     if supportive > stressful:
-        summary = overview_text["steady"]
+        summary = "A year with some steadier windows for progress, as long as you use the sharper periods more carefully."
     elif stressful > supportive:
-        summary = overview_text["demanding"]
+        summary = "A more demanding year that rewards pacing, clearer boundaries, and better timing."
     else:
-        summary = overview_text["mixed"]
+        summary = "A mixed year with alternating stretches of pressure, reset, and usable momentum."
 
-    top_themes = [
-        overview_text["theme_template"].format(emoji=DOMAIN_EMOJIS[domain], domain=domain_labels[domain])
-        for domain in top_domains
-    ]
+    top_themes = [f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]} comes up repeatedly across the year." for domain in top_domains]
     caution_periods = [
         f"{period['start_date']} to {period['end_date']} · {period['headline']}"
         for period in periods
@@ -69,8 +61,8 @@ def build_year_overview(periods: list[dict], lang: str = "en") -> dict:
         "tone_summary": [
             {
                 "tone": tone,
-                "label": tone_ui[tone]["label"],
-                "emoji": tone_ui[tone]["emoji"],
+                "label": TONE_UI[tone]["label"],
+                "emoji": TONE_UI[tone]["emoji"],
                 "count": count,
             }
             for tone, count in ordered_tones
@@ -80,6 +72,6 @@ def build_year_overview(periods: list[dict], lang: str = "en") -> dict:
             domain: round(sum(period["domains"][domain] for period in periods) / len(periods), 1)
             for domain in DOMAINS
         },
-        "top_caution_periods": caution_periods or [overview_text["no_caution"]],
-        "top_opportunity_periods": opportunity_periods or [overview_text["no_opportunity"]],
+        "top_caution_periods": caution_periods or ["No strong caution windows were surfaced from the current ruleset."],
+        "top_opportunity_periods": opportunity_periods or ["No unusually supportive windows were surfaced from the current ruleset."],
     }
