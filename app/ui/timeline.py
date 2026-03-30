@@ -135,17 +135,25 @@ def _clarity_label(confidence: float) -> str:
     return "Clarity: general direction"
 
 
-def render_period_timeline(periods: list[dict], mode: str) -> None:
-    st.caption("Read each period like a weather shift: headline first, then the focus areas and cautions underneath.")
-    today = date.today()
-    current_period_id = next(
+def _resolve_current_period_id(periods: list[dict], target_year: int, today: date | None = None) -> str | None:
+    current_day = today or date.today()
+    if target_year != current_day.year:
+        return None
+
+    return next(
         (
             period["id"]
             for period in periods
-            if date.fromisoformat(period["start_date"]) <= today <= date.fromisoformat(period["end_date"])
+            if date.fromisoformat(period["start_date"]) <= current_day <= date.fromisoformat(period["end_date"])
         ),
         None,
     )
+
+
+def render_period_timeline(periods: list[dict], mode: str, target_year: int) -> None:
+    st.caption("Read each period like a weather shift: headline first, then the focus areas and cautions underneath.")
+    current_period_id = _resolve_current_period_id(periods, target_year)
+    allow_auto_expand = target_year == date.today().year
 
     for index, period in enumerate(periods):
         tone_meta = TONE_UI[period["tone"]]
@@ -159,7 +167,10 @@ def render_period_timeline(periods: list[dict], mode: str) -> None:
             unsafe_allow_html=True,
         )
 
-        with st.expander(header, expanded=is_current or (current_period_id is None and mode == "concise" and index == 0)):
+        with st.expander(
+            header,
+            expanded=is_current or (allow_auto_expand and current_period_id is None and mode == "concise" and index == 0),
+        ):
             header_pills = [
                 _pretty_date_range(period["start_date"], period["end_date"]),
                 tone_meta["label"],
