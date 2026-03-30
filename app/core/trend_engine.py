@@ -10,12 +10,22 @@ from app.providers.template_narrative import TemplateNarrativeProvider
 
 
 def build_multi_year_domain_trends(user_input: UserInput, years_to_show: int = 5) -> list[dict]:
+    end_year = user_input.target_year + max(1, years_to_show) - 1
+    return _build_year_domain_trends(user_input, user_input.target_year, end_year)
+
+
+def build_lifetime_domain_trends(user_input: UserInput, max_age: int = 80) -> list[dict]:
+    birth_year = user_input.birth_date.year
+    return _build_year_domain_trends(user_input, birth_year, birth_year + max_age)
+
+
+def _build_year_domain_trends(user_input: UserInput, start_year: int, end_year: int) -> list[dict]:
     provider = TemplateNarrativeProvider()
     natal_chart = build_natal_chart(user_input)
     trend_rows: list[dict] = []
 
-    for offset in range(max(1, years_to_show)):
-        current_input = user_input.model_copy(update={"target_year": user_input.target_year + offset})
+    for target_year in range(start_year, end_year + 1):
+        current_input = user_input.model_copy(update={"target_year": target_year})
         window_start, window_end = get_year_window(current_input)
         change_points = build_year_change_points(current_input, natal_chart, window_start, window_end)
         periods = build_periods(window_start, window_end, change_points)
@@ -23,6 +33,7 @@ def build_multi_year_domain_trends(user_input: UserInput, years_to_show: int = 5
         period_payload = attach_narratives(structured_periods, provider)
         overview = build_year_overview(period_payload)
 
+        domain_metrics = _domain_metrics(period_payload)
         peak_windows = {}
         for domain in DOMAINS:
             peak_period = max(period_payload, key=lambda period: period["domains"][domain])
@@ -37,11 +48,39 @@ def build_multi_year_domain_trends(user_input: UserInput, years_to_show: int = 5
         trend_rows.append(
             {
                 "target_year": current_input.target_year,
+                "age": current_input.target_year - user_input.birth_date.year,
                 "window_start": window_start.isoformat(),
                 "window_end": window_end.isoformat(),
                 "domain_totals": overview["domain_totals"],
+                "domain_metrics": domain_metrics,
                 "peak_windows": peak_windows,
             }
         )
 
     return trend_rows
+
+
+def _domain_metrics(period_payload: list[dict]) -> dict[str, dict[str, float]]:
+    metrics = {}
+    for domain in DOMAINS:
+        scores = [period["domains"][domain] for period in period_payload]
+        metrics[domain] = {
+            "average": round(sum(scores) / len(scores), 1),
+            "p80": round(_quantile(scores, 0.8), 1),
+        }
+    return metrics
+
+
+def _quantile(values: list[int], q: float) -> float:
+    if not values:
+        return 0.0
+
+    ranked = sorted(values)
+    if len(ranked) == 1:
+        return float(ranked[0])
+
+    position = (len(ranked) - 1) * q
+    lower = int(position)
+    upper = min(lower + 1, len(ranked) - 1)
+    fraction = position - lower
+    return ranked[lower] + (ranked[upper] - ranked[lower]) * fraction
