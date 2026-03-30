@@ -4,6 +4,7 @@ from app.core.config import DOMAINS
 from app.ui.report import (
     _build_domain_trend_frame,
     _current_age_from_birth_date,
+    _current_age_marker_layer,
     _default_long_range_metric_label,
     _default_long_range_scope_label,
     _long_range_score_label,
@@ -136,3 +137,9 @@ def test_summary_trend_rows_uses_current_age_onward_for_lifetime_scope() -> None
     )
 
     assert [row["age"] for row in filtered] == [36, 40]
+
+
+def test_current_age_marker_layer_uses_birth_date() -> None:
+    marker_layers = _current_age_marker_layer({"birth_date": "1990-03-29"})
+
+    assert marker_layers is not None

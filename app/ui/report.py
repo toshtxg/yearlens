@@ -321,6 +321,35 @@ def _summary_trend_rows(trend_rows: list[dict], scope: str, input_snapshot: dict
     return future_rows or trend_rows
 
 
+def _current_age_marker_layer(input_snapshot: dict) -> tuple[alt.Chart, alt.Chart] | None:
+    birth_date_value = input_snapshot.get("birth_date")
+    if not birth_date_value:
+        return None
+
+    current_age = _current_age_from_birth_date(str(birth_date_value))
+    marker_frame = pd.DataFrame([{"age": current_age, "label": f"Current age {current_age}"}])
+
+    rule = alt.Chart(marker_frame).mark_rule(
+        color="#f0b332",
+        strokeDash=[7, 5],
+        strokeWidth=2,
+        opacity=0.9,
+    ).encode(x=alt.X("age:Q"))
+
+    label = alt.Chart(marker_frame).mark_text(
+        align="left",
+        baseline="top",
+        dx=8,
+        dy=8,
+        color="#f7d27b",
+        font="Manrope",
+        fontSize=12,
+        fontWeight=800,
+    ).encode(x=alt.X("age:Q"), y=alt.value(8), text=alt.Text("label:N"))
+
+    return rule, label
+
+
 def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) -> None:
     st.markdown("<div class='yearlens-section-title'>Long-range pillar trend</div>", unsafe_allow_html=True)
     st.caption("Hover a point to see the year, age, value, and the strongest window inside that year.")
@@ -398,7 +427,7 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
         alt.Tooltip("tone:N", title="Tone"),
         alt.Tooltip("headline:N", title="Reading"),
     ]
-    chart = (
+    line_chart = (
         alt.Chart(trend_frame)
         .mark_line(color=accent, strokeWidth=3, point=alt.OverlayMarkDef(color=accent, size=95, stroke="#0b1120", strokeWidth=2))
         .encode(
@@ -411,7 +440,16 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
             ),
             tooltip=tooltip,
         )
-        .properties(height=240)
+    )
+
+    chart = line_chart
+    if scope == "lifetime":
+        marker_layers = _current_age_marker_layer(metadata["input_snapshot"])
+        if marker_layers:
+            chart = alt.layer(line_chart, *marker_layers)
+
+    chart = (
+        chart.properties(height=240)
         .configure_view(strokeOpacity=0)
         .configure_axis(labelFont="Manrope", titleFont="Manrope")
         .configure(background="transparent")
@@ -427,6 +465,8 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
     peak_window = peak_year["peak_windows"][selected_domain]
     strongest_window = strongest_window_year["peak_windows"][selected_domain]
     low_window = low_year["peak_windows"][selected_domain]
+
+    st.markdown("<div class='yearlens-section-title'>Key windows from here on:</div>", unsafe_allow_html=True)
 
     st.markdown(
         (
