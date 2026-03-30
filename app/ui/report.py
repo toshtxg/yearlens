@@ -279,8 +279,8 @@ def _long_range_meta_label(row: dict, metric_key: str, domain: str, scope: str) 
 
 
 def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) -> None:
-    with st.expander("See long-range pillar trend: birth to age 80", expanded=False):
-        st.caption("Open this to see when the selected pillar tends to run stronger or quieter across life. Default view: Life to 80 using Average.")
+    with st.expander("Open long-range pillar trend: birth to age 80, average view by default", expanded=False):
+        st.caption("Open this only when you want the longer arc. It starts on Life to 80 with Average so you can scan the full pattern first.")
 
         scope_label = st.segmented_control(
             "Trend range",
@@ -289,7 +289,7 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
             selection_mode="single",
             width="content",
             label_visibility="collapsed",
-            key="yearlens_trend_scope",
+            key="yearlens_trend_scope_v2",
         )
         metric_label = st.segmented_control(
             "Trend metric",
@@ -298,7 +298,7 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
             selection_mode="single",
             width="content",
             label_visibility="collapsed",
-            key="yearlens_trend_metric",
+            key="yearlens_trend_metric_v2",
         )
         metric_key = "p80" if metric_label == "P80" else "average"
         scope = "lifetime" if scope_label == "Life to 80" else "coming_years"
@@ -314,7 +314,7 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
                     selection_mode="single",
                     width="content",
                     label_visibility="collapsed",
-                    key="yearlens_future_years",
+                    key="yearlens_future_years_v2",
                 )
                 or 5
             )
