@@ -263,6 +263,21 @@ def _trend_reveal_key() -> str:
     return "yearlens_trends_visible_v1"
 
 
+def _trend_report_key(metadata: dict) -> str:
+    input_snapshot = metadata["input_snapshot"]
+    return "|".join(
+        [
+            str(input_snapshot.get("birth_date", "")),
+            str(input_snapshot.get("birth_time", "")),
+            str(input_snapshot.get("birth_location", "")),
+            str(input_snapshot.get("target_year", "")),
+            str(input_snapshot.get("year_anchor", "")),
+            str(metadata.get("window_start", "")),
+            str(metadata.get("window_end", "")),
+        ]
+    )
+
+
 def _long_range_note_title(scope: str) -> str:
     return "Peak age" if scope == "lifetime" else "Peak year"
 
@@ -759,14 +774,20 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
 
     _render_tone_summary_chips(overview["tone_summary"])
     _render_domain_emphasis(overview)
-    if _trend_reveal_key() not in st.session_state:
-        st.session_state[_trend_reveal_key()] = False
+    reveal_key = _trend_reveal_key()
+    report_key = _trend_report_key(metadata)
+    report_state_key = f"{reveal_key}_report"
+    if st.session_state.get(report_state_key) != report_key:
+        st.session_state[reveal_key] = False
+        st.session_state[report_state_key] = report_key
+    elif reveal_key not in st.session_state:
+        st.session_state[reveal_key] = False
 
-    button_label = "Click / Tap to open Trends" if not st.session_state[_trend_reveal_key()] else "Hide Trends"
+    button_label = "Click / Tap to open Trends" if not st.session_state[reveal_key] else "Hide Trends"
     if st.button(button_label, key="yearlens_trend_reveal_button", type="secondary"):
-        st.session_state[_trend_reveal_key()] = not st.session_state[_trend_reveal_key()]
+        st.session_state[reveal_key] = not st.session_state[reveal_key]
 
-    if st.session_state[_trend_reveal_key()]:
+    if st.session_state[reveal_key]:
         selected_domain = _render_domain_trend_chart(periods, overview)
         _render_multi_year_domain_trend_chart(metadata, selected_domain)
 
