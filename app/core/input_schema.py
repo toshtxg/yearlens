@@ -22,7 +22,7 @@ class UserInput(BaseModel):
     timezone_id: str | None = None
     target_year: int = Field(ge=1900, le=2100)
     name: str | None = None
-    year_anchor: Literal["birthday", "calendar"] = "birthday"
+    year_anchor: Literal["birthday", "calendar"] = "calendar"
     preferences: ReadingPreferences = Field(default_factory=ReadingPreferences)
 
     @field_validator("birth_location")

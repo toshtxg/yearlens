@@ -14,7 +14,7 @@ def test_valid_user_input_defaults() -> None:
         target_year=2026,
     )
 
-    assert model.year_anchor == "birthday"
+    assert model.year_anchor == "calendar"
     assert model.preferences.zodiac == "sidereal"
 
 

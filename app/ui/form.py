@@ -30,8 +30,8 @@ def render_input_form() -> dict | None:
 
         birth_location = st.text_input("Birth location", value="Singapore")
         cycle_options = {
-            "Birthday cycle": "birthday",
             "Calendar year": "calendar",
+            "Birthday cycle": "birthday",
         }
         selected_cycle = st.selectbox("Reading cycle", list(cycle_options), index=0)
         year_anchor = cycle_options[selected_cycle]

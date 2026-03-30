@@ -64,7 +64,7 @@ def test_get_year_window_anchor_regression_cases() -> None:
     january_window = get_year_window(january_birth)
     january_calendar = get_year_window(january_birth.model_copy(update={"year_anchor": "calendar"}))
     july_window = get_year_window(july_birth)
-    july_calendar = get_year_window(july_birth.model_copy(update={"year_anchor": "calendar"}))
+    july_birthday = get_year_window(july_birth.model_copy(update={"year_anchor": "birthday"}))
 
     assert january_window == january_calendar
-    assert july_window != july_calendar
+    assert july_window != july_birthday
