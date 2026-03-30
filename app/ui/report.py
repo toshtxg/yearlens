@@ -260,7 +260,7 @@ def _default_long_range_metric_label() -> str:
 
 
 def _trend_reveal_key() -> str:
-    return "yearlens_trends_visible_v1"
+    return "yearlens_trends_visible_v2"
 
 
 def _trend_report_key(metadata: dict) -> str:
@@ -783,7 +783,7 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
     elif reveal_key not in st.session_state:
         st.session_state[reveal_key] = False
 
-    button_label = "Click / Tap to open Trends" if not st.session_state[reveal_key] else "Hide Trends"
+    button_label = "Click / Tap to open Trends." if not st.session_state[reveal_key] else "Click / Tap to hide Trends."
     if st.button(button_label, key="yearlens_trend_reveal_button", type="secondary"):
         st.session_state[reveal_key] = not st.session_state[reveal_key]
 
