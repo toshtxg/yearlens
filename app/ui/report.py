@@ -465,14 +465,21 @@ def render_report_actions(report: dict) -> None:
     natal_chart = metadata["natal_chart"]
 
     notes = [
-        "Use this as reflective guidance, not certainty or guaranteed prediction.",
-        "The report stays in the current session and is not written to a database or report file by default.",
+        "For reflection and timing, not certainty or guaranteed prediction.",
+        "This report stays in the current session and is not written to a database or report file by default.",
         "Do not use it as the sole basis for medical, legal, financial, or relationship decisions.",
     ]
 
     if "manual_coordinates" not in natal_chart["location"]["source"]:
         notes.append("If you entered a place name, that location text was sent to the geocoder to resolve coordinates.")
 
-    with st.expander("Notes on interpretation and privacy", expanded=False):
-        st.markdown("\n".join(f"- {note}" for note in notes))
-        st.caption("If you want the technical details, the Debug payload stays available below.")
+    notes_html = "".join(f"<li>{escape(note)}</li>" for note in notes)
+    st.markdown(
+        (
+            "<div class='yearlens-footer-note-shell'>"
+            "<div class='yearlens-footer-note-title'>A few gentle notes</div>"
+            f"<ul class='yearlens-footer-note-list'>{notes_html}</ul>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )

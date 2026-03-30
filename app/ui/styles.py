@@ -153,6 +153,34 @@ def inject_global_styles() -> None:
             line-height: 1.5;
         }
 
+        .yearlens-footer-note-shell {
+            margin: 1.1rem 0 0.15rem 0;
+            padding: 0.85rem 0 0 0;
+            border-top: 1px solid rgba(148, 163, 184, 0.14);
+            opacity: 0.72;
+        }
+
+        .yearlens-footer-note-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--yl-text-muted);
+            margin-bottom: 0.4rem;
+            font-weight: 800;
+        }
+
+        .yearlens-footer-note-list {
+            margin: 0;
+            padding-left: 1rem;
+            color: var(--yl-text-muted);
+            font-size: 0.84rem;
+        }
+
+        .yearlens-footer-note-list li {
+            margin: 0.18rem 0;
+            line-height: 1.45;
+        }
+
         div[data-testid="stForm"] {
             padding: 0.95rem 1rem 1rem 1rem;
             margin-top: 0.25rem;
