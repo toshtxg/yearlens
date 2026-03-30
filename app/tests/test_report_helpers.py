@@ -1,5 +1,10 @@
 from app.core.config import DOMAINS
-from app.ui.report import _build_domain_trend_frame, _summarize_domain_extremes
+from app.ui.report import (
+    _build_domain_trend_frame,
+    _default_long_range_metric_label,
+    _default_long_range_scope_label,
+    _summarize_domain_extremes,
+)
 
 
 def test_build_domain_trend_frame_creates_one_row_per_period_and_domain() -> None:
@@ -64,3 +69,8 @@ def test_summarize_domain_extremes_returns_peak_and_low_windows() -> None:
     assert summary["peak"]["headline"] == "Second stretch"
     assert summary["low"]["score"] == 3
     assert summary["low"]["headline"] == "First stretch"
+
+
+def test_long_range_trend_defaults_match_expected_ui_choices() -> None:
+    assert _default_long_range_scope_label() == "Life to 80"
+    assert _default_long_range_metric_label() == "Average"
