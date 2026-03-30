@@ -107,7 +107,7 @@ def main() -> None:
         )
         return
 
-    render_year_overview(report["year_overview"], report["metadata"])
+    render_year_overview(report["year_overview"], report["metadata"], report["periods"])
     render_year_timeline_bar(report["periods"])
 
     st.markdown("<div class='yearlens-section-heading yearlens-section-heading-compact'>Read The Year</div>", unsafe_allow_html=True)

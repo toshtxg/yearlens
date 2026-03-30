@@ -510,6 +510,60 @@ def inject_global_styles() -> None:
             background: linear-gradient(90deg, rgba(125, 211, 252, 0.95), rgba(215, 164, 65, 0.95));
         }
 
+        .yearlens-trend-note-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.7rem;
+            margin: 0.35rem 0 0.95rem 0;
+        }
+
+        .yearlens-trend-note {
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 18px;
+            padding: 0.85rem 0.9rem;
+            background: rgba(18, 28, 44, 0.82);
+        }
+
+        .yearlens-trend-note-peak {
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+
+        .yearlens-trend-note-low {
+            border-color: rgba(125, 211, 252, 0.18);
+        }
+
+        .yearlens-trend-note-kicker {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--yl-text-muted);
+            margin-bottom: 0.32rem;
+            font-weight: 800;
+        }
+
+        .yearlens-trend-note-score {
+            font-size: 1.3rem;
+            font-family: "Space Grotesk", sans-serif;
+            color: var(--yl-text);
+            margin-bottom: 0.18rem;
+        }
+
+        .yearlens-trend-note-window {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--yl-text-muted);
+            margin-bottom: 0.24rem;
+            font-weight: 700;
+        }
+
+        .yearlens-trend-note-copy {
+            color: var(--yl-text-soft);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            font-weight: 700;
+        }
+
         .yearlens-timeline-bar {
             display: flex;
             width: 100%;
@@ -934,7 +988,8 @@ def inject_global_styles() -> None:
 
         @media (max-width: 900px) {
             .yearlens-domain-emphasis-grid,
-            .yearlens-score-grid {
+            .yearlens-score-grid,
+            .yearlens-trend-note-grid {
                 grid-template-columns: 1fr;
             }
         }

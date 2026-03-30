@@ -1,13 +1,25 @@
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import date, timedelta
 from html import escape
 
+import altair as alt
+import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from app.core.config import DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
+from app.core.config import DOMAINS, DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
+
+
+DOMAIN_TREND_COLORS = {
+    "career_work": "#7dd3fc",
+    "money_finance": "#fbbf24",
+    "relationships": "#fb7185",
+    "health_emotional": "#34d399",
+    "travel_overseas": "#c4b5fd",
+    "study_growth": "#60a5fa",
+}
 
 
 def _render_pill_row(items: list[str]) -> None:
@@ -99,6 +111,124 @@ def _render_domain_emphasis(overview: dict) -> None:
             "<div class='yearlens-domain-emphasis-shell'>"
             "<div class='yearlens-section-title yearlens-section-title-inline'>Themes carrying the most weight this year</div>"
             f"<div class='yearlens-domain-emphasis-grid'>{''.join(cards)}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def _build_domain_trend_frame(periods: list[dict]) -> pd.DataFrame:
+    rows: list[dict] = []
+    for index, period in enumerate(periods, start=1):
+        start_date = date.fromisoformat(period["start_date"])
+        end_date = date.fromisoformat(period["end_date"])
+        midpoint = start_date + timedelta(days=(end_date - start_date).days // 2)
+        window_text = _format_date_range(start_date, end_date)
+        for domain in DOMAINS:
+            rows.append(
+                {
+                    "period_index": index,
+                    "domain": domain,
+                    "domain_display": f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}",
+                    "window": window_text,
+                    "window_start": start_date.isoformat(),
+                    "window_end": end_date.isoformat(),
+                    "point_date": midpoint.isoformat(),
+                    "score": period["domains"][domain],
+                    "headline": period["headline"],
+                    "tone": TONE_UI[period["tone"]]["label"],
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def _summarize_domain_extremes(periods: list[dict], domain: str) -> dict:
+    ranked = sorted(
+        (
+            {
+                "score": period["domains"][domain],
+                "window": _format_window_text(period["start_date"], period["end_date"]),
+                "headline": period["headline"],
+            }
+            for period in periods
+        ),
+        key=lambda item: item["score"],
+    )
+    return {"low": ranked[0], "peak": ranked[-1]}
+
+
+def _render_domain_trend_chart(periods: list[dict], overview: dict) -> None:
+    if not periods:
+        return
+
+    trend_frame = _build_domain_trend_frame(periods)
+    default_domain = max(overview["domain_totals"], key=overview["domain_totals"].get)
+
+    st.markdown("<div class='yearlens-section-title'>How a pillar rises and falls through the year</div>", unsafe_allow_html=True)
+    st.caption("Pick one pillar, then hover a point to see the exact window, score, and reading for that stretch.")
+
+    selected_domain = st.selectbox(
+        "Track one pillar through the year",
+        options=DOMAINS,
+        index=DOMAINS.index(default_domain),
+        format_func=lambda domain: f"{DOMAIN_EMOJIS[domain]} {DOMAIN_LABELS[domain]}",
+        key="yearlens_domain_trend",
+    )
+
+    domain_frame = trend_frame[trend_frame["domain"] == selected_domain]
+    accent = DOMAIN_TREND_COLORS[selected_domain]
+
+    x_encoding = alt.X(
+        "point_date:T",
+        title=None,
+        axis=alt.Axis(format="%b %d", labelAngle=-24, labelColor="#8fa0bc", tickColor="rgba(148, 163, 184, 0.18)", domain=False, grid=False),
+    )
+    y_encoding = alt.Y(
+        "score:Q",
+        title="Score",
+        scale=alt.Scale(domain=[0, 10]),
+        axis=alt.Axis(values=[0, 2, 4, 6, 8, 10], labelColor="#8fa0bc", titleColor="#8fa0bc", gridColor="rgba(148, 163, 184, 0.14)"),
+    )
+    tooltip = [
+        alt.Tooltip("window:N", title="Window"),
+        alt.Tooltip("domain_display:N", title="Pillar"),
+        alt.Tooltip("score:Q", title="Value", format=".1f"),
+        alt.Tooltip("tone:N", title="Tone"),
+        alt.Tooltip("headline:N", title="Reading"),
+    ]
+
+    base = alt.Chart(domain_frame).encode(x=x_encoding, y=y_encoding)
+    line = base.mark_line(color=accent, strokeWidth=3, interpolate="monotone")
+    visible_points = base.mark_circle(color=accent, size=90, stroke="#0b1120", strokeWidth=2)
+    hover_targets = base.mark_circle(size=260, opacity=0).encode(tooltip=tooltip)
+
+    chart = (
+        alt.layer(line, visible_points, hover_targets)
+        .properties(height=250)
+        .configure_view(strokeOpacity=0)
+        .configure_axis(labelFont="Manrope", titleFont="Manrope")
+        .configure(background="transparent")
+    )
+    st.altair_chart(chart, use_container_width=True)
+
+    extremes = _summarize_domain_extremes(periods, selected_domain)
+    peak = extremes["peak"]
+    low = extremes["low"]
+    st.markdown(
+        (
+            "<div class='yearlens-trend-note-grid'>"
+            "<div class='yearlens-trend-note yearlens-trend-note-peak'>"
+            "<div class='yearlens-trend-note-kicker'>Peak window</div>"
+            f"<div class='yearlens-trend-note-score'>{peak['score']}/10</div>"
+            f"<div class='yearlens-trend-note-window'>{escape(peak['window'])}</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(peak['headline'])}</div>"
+            "</div>"
+            "<div class='yearlens-trend-note yearlens-trend-note-low'>"
+            "<div class='yearlens-trend-note-kicker'>Lower-emphasis window</div>"
+            f"<div class='yearlens-trend-note-score'>{low['score']}/10</div>"
+            f"<div class='yearlens-trend-note-window'>{escape(low['window'])}</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(low['headline'])}</div>"
+            "</div>"
             "</div>"
         ),
         unsafe_allow_html=True,
@@ -427,7 +557,7 @@ def _render_segment_label(start_value: str, end_value: str, size_class: str) -> 
     )
 
 
-def render_year_overview(overview: dict, metadata: dict) -> None:
+def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) -> None:
     anchor_label = "Birthday cycle" if metadata["year_anchor"] == "birthday" else "Calendar year"
     window_text = _format_window_text(metadata["window_start"], metadata["window_end"])
 
@@ -450,6 +580,7 @@ def render_year_overview(overview: dict, metadata: dict) -> None:
 
     _render_tone_summary_chips(overview["tone_summary"])
     _render_domain_emphasis(overview)
+    _render_domain_trend_chart(periods, overview)
 
     col1, col2, col3 = st.columns(3, gap="small")
     with col1:
