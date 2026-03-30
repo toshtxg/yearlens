@@ -783,7 +783,7 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
     elif reveal_key not in st.session_state:
         st.session_state[reveal_key] = False
 
-    button_label = "Click / Tap to open Trends." if not st.session_state[reveal_key] else "Click / Tap to hide Trends."
+    button_label = "📈 Click / Tap to open Trends" if not st.session_state[reveal_key] else "📈 Click / Tap to hide Trends"
     if st.button(button_label, key="yearlens_trend_reveal_button", type="secondary"):
         st.session_state[reveal_key] = not st.session_state[reveal_key]
 

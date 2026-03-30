@@ -269,25 +269,32 @@ def inject_global_styles() -> None:
             color: #0f172a !important;
         }
 
+        div[data-testid="stButton"] {
+            width: 100%;
+            margin: 0.25rem 0 0.4rem 0;
+        }
+
         div[data-testid="stButton"] button[kind="secondary"] {
-            min-height: 2.7rem;
-            padding: 0.45rem 1rem;
+            width: 100%;
+            min-height: 3rem;
+            padding: 0.55rem 1rem;
             border-radius: 999px !important;
-            border: 1px solid rgba(215, 164, 65, 0.35) !important;
-            background: rgba(31, 45, 73, 0.7) !important;
-            color: var(--yl-text) !important;
-            box-shadow: none !important;
+            border: none !important;
+            background: linear-gradient(135deg, var(--yl-accent-soft), var(--yl-accent)) !important;
+            color: #0f172a !important;
+            box-shadow: 0 14px 30px rgba(215, 164, 65, 0.2);
+            justify-content: center;
         }
 
         div[data-testid="stButton"] button[kind="secondary"]:hover {
-            border-color: rgba(215, 164, 65, 0.55) !important;
-            background: linear-gradient(135deg, rgba(125, 211, 252, 0.18), rgba(215, 164, 65, 0.2)) !important;
+            background: linear-gradient(135deg, #f7d27b, #f0b332) !important;
+            box-shadow: 0 18px 34px rgba(215, 164, 65, 0.24);
         }
 
         div[data-testid="stButton"] button[kind="secondary"] p {
-            color: var(--yl-text) !important;
-            font-size: 0.96rem;
-            font-weight: 700;
+            color: #0f172a !important;
+            font-size: 0.98rem;
+            font-weight: 800;
         }
 
         div[data-testid="stSegmentedControl"] button {
