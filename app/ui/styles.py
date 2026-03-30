@@ -485,32 +485,183 @@ def inject_global_styles() -> None:
         .yearlens-timeline-bar {
             display: flex;
             width: 100%;
-            height: 38px;
-            border-radius: 12px;
-            overflow: hidden;
+            align-items: stretch;
+            min-height: 4rem;
+            border-radius: 14px;
+            overflow: visible;
             margin: 0;
-            gap: 2px;
+            gap: 3px;
             background: rgba(255, 255, 255, 0.03);
+        }
+
+        .yearlens-timeline-slot {
+            position: relative;
+            display: block;
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+
+        .yearlens-timeline-slot summary {
+            list-style: none;
+        }
+
+        .yearlens-timeline-slot summary::-webkit-details-marker {
+            display: none;
         }
 
         .yearlens-timeline-segment {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.68rem;
+            width: 100%;
+            min-height: 4rem;
+            padding: 0.3rem 0.32rem;
+            font-size: 0.82rem;
             color: #111827;
             font-weight: 700;
             letter-spacing: 0.02em;
-            cursor: default;
-            transition: opacity 0.15s ease;
-            border-radius: 4px;
-            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+            border-radius: 12px;
+            white-space: normal;
             overflow: hidden;
-            text-overflow: ellipsis;
+            text-overflow: clip;
+            text-align: center;
+            line-height: 1.05;
+            user-select: none;
         }
 
-        .yearlens-timeline-segment:hover {
-            opacity: 0.82;
+        .yearlens-timeline-segment:hover,
+        .yearlens-timeline-slot[open] .yearlens-timeline-segment {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14);
+        }
+
+        .yearlens-timeline-segment:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.2);
+            outline-offset: 2px;
+        }
+
+        .yearlens-timeline-segment-label {
+            display: block;
+            max-width: 100%;
+        }
+
+        .yearlens-timeline-segment-label-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.04rem;
+        }
+
+        .yearlens-timeline-slot--wide .yearlens-timeline-segment {
+            font-size: 0.76rem;
+        }
+
+        .yearlens-timeline-slot--medium .yearlens-timeline-segment {
+            font-size: 0.69rem;
+        }
+
+        .yearlens-timeline-slot--compact .yearlens-timeline-segment {
+            padding: 0;
+        }
+
+        .yearlens-timeline-segment-label-hidden {
+            display: none;
+        }
+
+        .yearlens-timeline-popover {
+            position: absolute;
+            left: 50%;
+            top: calc(100% + 0.55rem);
+            transform: translateX(-50%) translateY(-4px);
+            width: min(16rem, calc(100vw - 3rem));
+            padding: 0.72rem 0.8rem 0.78rem 0.8rem;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(12, 18, 32, 0.98);
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.48);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.14s ease, transform 0.14s ease;
+            z-index: 8;
+        }
+
+        .yearlens-timeline-popover::before {
+            content: "";
+            position: absolute;
+            top: -0.38rem;
+            left: 50%;
+            width: 0.75rem;
+            height: 0.75rem;
+            transform: translateX(-50%) rotate(45deg);
+            background: rgba(12, 18, 32, 0.98);
+            border-left: 1px solid rgba(148, 163, 184, 0.2);
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .yearlens-timeline-slot:hover .yearlens-timeline-popover,
+        .yearlens-timeline-slot[open] .yearlens-timeline-popover,
+        .yearlens-timeline-slot:focus-within .yearlens-timeline-popover {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .yearlens-timeline-popover-range {
+            color: var(--yl-text-muted);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.28rem;
+            font-weight: 800;
+        }
+
+        .yearlens-timeline-popover-tone {
+            color: var(--yl-text);
+            font-size: 0.92rem;
+            font-weight: 800;
+            margin-bottom: 0.18rem;
+        }
+
+        .yearlens-timeline-popover-copy {
+            color: var(--yl-text-soft);
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .yearlens-timeline-slot:first-child .yearlens-timeline-popover {
+            left: 0;
+            transform: translateY(-4px);
+        }
+
+        .yearlens-timeline-slot:first-child .yearlens-timeline-popover::before {
+            left: 1.15rem;
+            transform: rotate(45deg);
+        }
+
+        .yearlens-timeline-slot:first-child:hover .yearlens-timeline-popover,
+        .yearlens-timeline-slot:first-child[open] .yearlens-timeline-popover,
+        .yearlens-timeline-slot:first-child:focus-within .yearlens-timeline-popover {
+            transform: translateY(0);
+        }
+
+        .yearlens-timeline-slot:last-child .yearlens-timeline-popover {
+            left: auto;
+            right: 0;
+            transform: translateY(-4px);
+        }
+
+        .yearlens-timeline-slot:last-child .yearlens-timeline-popover::before {
+            left: auto;
+            right: 1.15rem;
+            transform: rotate(45deg);
+        }
+
+        .yearlens-timeline-slot:last-child:hover .yearlens-timeline-popover,
+        .yearlens-timeline-slot:last-child[open] .yearlens-timeline-popover,
+        .yearlens-timeline-slot:last-child:focus-within .yearlens-timeline-popover {
+            transform: translateY(0);
         }
 
         .yearlens-timeline-legend {
@@ -797,6 +948,24 @@ def inject_global_styles() -> None:
 
             .yearlens-overview-meta {
                 gap: 0.42rem;
+            }
+
+            .yearlens-timeline-bar {
+                min-height: 3.7rem;
+                gap: 2px;
+            }
+
+            .yearlens-timeline-slot--wide .yearlens-timeline-segment {
+                font-size: 0.66rem;
+            }
+
+            .yearlens-timeline-slot--medium .yearlens-timeline-segment {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.16rem;
+            }
+
+            .yearlens-timeline-popover {
+                width: min(14rem, calc(100vw - 2.4rem));
             }
         }
         </style>

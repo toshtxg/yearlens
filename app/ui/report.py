@@ -115,13 +115,22 @@ def render_year_timeline_bar(periods: list[dict]) -> None:
         if tone not in tone_order:
             tone_order.append(tone)
         width = (_period_duration(period) / total_days) * 100
-        label = _format_segment_label(period["start_date"], period["end_date"]) if width > 8 else ""
-        tooltip = f"{_format_window_text(period['start_date'], period['end_date'])}: {TONE_UI[tone]['label']}"
+        size_class = _timeline_segment_size(width)
+        label_html = _render_segment_label(period["start_date"], period["end_date"], size_class)
+        window_text = _format_window_text(period["start_date"], period["end_date"])
+        tooltip = f"{window_text} • {TONE_UI[tone]['label']} • {period['headline']}"
         segments.append(
             (
-                f"<div class='yearlens-timeline-segment' style='width:{width:.2f}%; background:{TONE_COLORS[tone]};' title='{escape(tooltip)}'>"
-                f"{escape(label)}"
+                f"<details class='yearlens-timeline-slot yearlens-timeline-slot--{size_class}' style='width:{width:.2f}%;'>"
+                f"<summary class='yearlens-timeline-segment' style='background:{TONE_COLORS[tone]};' title='{escape(tooltip)}' aria-label='{escape(tooltip)}'>"
+                f"{label_html}"
+                "</summary>"
+                "<div class='yearlens-timeline-popover' role='note'>"
+                f"<div class='yearlens-timeline-popover-range'>{escape(window_text)}</div>"
+                f"<div class='yearlens-timeline-popover-tone'>{escape(TONE_UI[tone]['label'])}</div>"
+                f"<div class='yearlens-timeline-popover-copy'>{escape(period['headline'])}</div>"
                 "</div>"
+                "</details>"
             )
         )
 
@@ -153,12 +162,42 @@ def _period_duration(period: dict) -> int:
     return (end - start).days + 1
 
 
-def _format_segment_label(start_value: str, end_value: str) -> str:
+def _timeline_segment_size(width: float) -> str:
+    if width >= 13:
+        return "wide"
+    if width >= 8:
+        return "medium"
+    return "compact"
+
+
+def _render_segment_label(start_value: str, end_value: str, size_class: str) -> str:
+    if size_class == "compact":
+        return "<span class='yearlens-timeline-segment-label yearlens-timeline-segment-label-hidden'></span>"
+
     start = date.fromisoformat(start_value)
     end = date.fromisoformat(end_value)
+
+    if size_class == "medium":
+        return (
+            "<span class='yearlens-timeline-segment-label yearlens-timeline-segment-label-stack'>"
+            f"<span>{escape(start.strftime('%b'))} {start.day}</span>"
+            f"<span>{escape(end.strftime('%b'))} {end.day}</span>"
+            "</span>"
+        )
+
     if start.month == end.month:
-        return f"{start.strftime('%b')} {start.day}-{end.day}"
-    return f"{start.strftime('%b')} {start.day}-{end.strftime('%b')} {end.day}"
+        return (
+            "<span class='yearlens-timeline-segment-label'>"
+            f"{escape(start.strftime('%b'))} {start.day}-{end.day}"
+            "</span>"
+        )
+
+    return (
+        "<span class='yearlens-timeline-segment-label yearlens-timeline-segment-label-stack'>"
+        f"<span>{escape(start.strftime('%b'))} {start.day}</span>"
+        f"<span>{escape(end.strftime('%b'))} {end.day}</span>"
+        "</span>"
+    )
 
 
 def render_year_overview(overview: dict, metadata: dict) -> None:
