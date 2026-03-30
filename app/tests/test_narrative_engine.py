@@ -34,6 +34,99 @@ def test_template_narrative_provider_adds_structured_copy() -> None:
     assert "rushed decisions" in payload["detailed_text"].lower()
 
 
+def test_template_narrative_provider_avoids_adjacent_duplicate_headlines() -> None:
+    periods = [
+        {
+            "id": "p1",
+            "tone": "mixed",
+            "top_domains": ["relationships", "health_emotional", "study_growth"],
+            "use_for": ["slower conversations", "resetting expectations"],
+            "careful_with": ["assumptions", "emotional overreactions"],
+            "surfaced_signals": [
+                {
+                    "key": "relationships",
+                    "level": "high",
+                    "label": "Relationships",
+                    "emoji": "❤️",
+                    "short_text": "Handle relationships with extra care",
+                    "detail_text": "Trust, closeness, expectations, or emotional reactions may feel more delicate than usual.",
+                }
+            ],
+            "dominant_drivers": [
+                {
+                    "summary": "A Moon-led stretch puts more attention on relationships and emotional response.",
+                    "house": 7,
+                    "event_type": "ingress",
+                }
+            ],
+        },
+        {
+            "id": "p2",
+            "tone": "mixed",
+            "top_domains": ["relationships", "health_emotional", "study_growth"],
+            "use_for": ["slower conversations", "resetting expectations"],
+            "careful_with": ["assumptions", "emotional overreactions"],
+            "surfaced_signals": [
+                {
+                    "key": "relationships",
+                    "level": "high",
+                    "label": "Relationships",
+                    "emoji": "❤️",
+                    "short_text": "Handle relationships with extra care",
+                    "detail_text": "Trust, closeness, expectations, or emotional reactions may feel more delicate than usual.",
+                }
+            ],
+            "dominant_drivers": [
+                {
+                    "summary": "Another Moon-led stretch keeps relationships emotionally close to the surface.",
+                    "house": 8,
+                    "event_type": "station",
+                }
+            ],
+        },
+    ]
+
+    payload = attach_narratives(periods, TemplateNarrativeProvider())
+
+    assert payload[0]["headline"] != payload[1]["headline"]
+
+
+def test_template_narrative_provider_is_stable_for_same_period() -> None:
+    period = {
+        "id": "p1",
+        "tone": "supportive",
+        "top_domains": ["money_finance", "career_work", "study_growth"],
+        "use_for": ["moving practical plans forward", "cleaner financial planning"],
+        "careful_with": ["overpromising"],
+        "surfaced_signals": [
+            {
+                "key": "decision_timing",
+                "status": "good",
+                "level": "high",
+                "label": "Decision Timing",
+                "emoji": "🧭",
+                "short_text": "A steadier window for key decisions",
+                "detail_text": "This window looks cleaner for important choices, agreements, and forward movement.",
+            }
+        ],
+        "dominant_drivers": [
+            {
+                "summary": "Jupiter support brings a little more clarity to practical decisions.",
+                "house": 2,
+                "event_type": "ingress",
+            }
+        ],
+    }
+
+    provider_a = TemplateNarrativeProvider()
+    provider_b = TemplateNarrativeProvider()
+
+    headline_a = attach_narratives([period], provider_a)[0]["headline"]
+    headline_b = attach_narratives([period], provider_b)[0]["headline"]
+
+    assert headline_a == headline_b
+
+
 def test_build_year_overview_returns_visual_summary_data() -> None:
     periods = [
         {
