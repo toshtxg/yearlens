@@ -299,6 +299,28 @@ def _long_range_meta_label(row: dict, metric_key: str, domain: str, scope: str) 
     return f"{year_prefix}{_metric_label(metric_key)} {row['domain_metrics'][domain][metric_key]:.1f}/10"
 
 
+def _current_age_from_birth_date(birth_date_value: str, *, today: date | None = None) -> int:
+    current_day = today or date.today()
+    birth_day = date.fromisoformat(str(birth_date_value)[:10])
+    age = current_day.year - birth_day.year
+    if (current_day.month, current_day.day) < (birth_day.month, birth_day.day):
+        age -= 1
+    return max(age, 0)
+
+
+def _summary_trend_rows(trend_rows: list[dict], scope: str, input_snapshot: dict, *, today: date | None = None) -> list[dict]:
+    if scope != "lifetime":
+        return trend_rows
+
+    birth_date_value = input_snapshot.get("birth_date")
+    if not birth_date_value:
+        return trend_rows
+
+    current_age = _current_age_from_birth_date(str(birth_date_value), today=today)
+    future_rows = [row for row in trend_rows if row["age"] >= current_age]
+    return future_rows or trend_rows
+
+
 def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) -> None:
     st.markdown("<div class='yearlens-section-title'>Long-range pillar trend</div>", unsafe_allow_html=True)
     st.caption("Hover a point to see the year, age, value, and the strongest window inside that year.")
@@ -396,9 +418,11 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
     )
     st.altair_chart(chart, use_container_width=True)
 
-    peak_year = max(trend_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
-    low_year = min(trend_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
-    strongest_window_year = max(trend_rows, key=lambda item: item["peak_windows"][selected_domain]["score"])
+    summary_rows = _summary_trend_rows(trend_rows, scope, metadata["input_snapshot"])
+
+    peak_year = max(summary_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
+    low_year = min(summary_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
+    strongest_window_year = max(summary_rows, key=lambda item: item["peak_windows"][selected_domain]["score"])
 
     peak_window = peak_year["peak_windows"][selected_domain]
     strongest_window = strongest_window_year["peak_windows"][selected_domain]

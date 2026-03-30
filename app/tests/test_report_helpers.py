@@ -1,9 +1,13 @@
+from datetime import date
+
 from app.core.config import DOMAINS
 from app.ui.report import (
     _build_domain_trend_frame,
+    _current_age_from_birth_date,
     _default_long_range_metric_label,
     _default_long_range_scope_label,
     _long_range_score_label,
+    _summary_trend_rows,
     _summarize_domain_extremes,
     _trend_report_key,
 )
@@ -108,3 +112,27 @@ def test_trend_report_key_changes_with_report_identity() -> None:
 def test_long_range_score_label_uses_birth_year_for_age_zero() -> None:
     assert _long_range_score_label({"age": 0, "target_year": 1990}, "lifetime") == "Birth year"
     assert _long_range_score_label({"age": 5, "target_year": 1995}, "lifetime") == "Age 5"
+
+
+def test_current_age_from_birth_date_handles_birthday_boundary() -> None:
+    assert _current_age_from_birth_date("1990-03-29", today=date(2026, 3, 29)) == 36
+    assert _current_age_from_birth_date("1990-03-30", today=date(2026, 3, 29)) == 35
+
+
+def test_summary_trend_rows_uses_current_age_onward_for_lifetime_scope() -> None:
+    trend_rows = [
+        {"age": 0, "target_year": 1990},
+        {"age": 20, "target_year": 2010},
+        {"age": 35, "target_year": 2025},
+        {"age": 36, "target_year": 2026},
+        {"age": 40, "target_year": 2030},
+    ]
+
+    filtered = _summary_trend_rows(
+        trend_rows,
+        "lifetime",
+        {"birth_date": "1990-03-29"},
+        today=date(2026, 3, 29),
+    )
+
+    assert [row["age"] for row in filtered] == [36, 40]
