@@ -254,7 +254,6 @@ def inject_global_styles() -> None:
         }
 
         div[data-testid="stFormSubmitButton"] button,
-        div[data-testid="stButton"] button,
         div[data-testid="stLinkButton"] a {
             min-height: 3rem;
             font-size: 1rem;
@@ -266,9 +265,29 @@ def inject_global_styles() -> None:
             box-shadow: 0 16px 30px rgba(215, 164, 65, 0.22);
         }
         div[data-testid="stFormSubmitButton"] button p,
-        div[data-testid="stButton"] button p,
         div[data-testid="stLinkButton"] a p {
             color: #0f172a !important;
+        }
+
+        div[data-testid="stButton"] button[kind="secondary"] {
+            min-height: 2.7rem;
+            padding: 0.45rem 1rem;
+            border-radius: 999px !important;
+            border: 1px solid rgba(215, 164, 65, 0.35) !important;
+            background: rgba(31, 45, 73, 0.7) !important;
+            color: var(--yl-text) !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stButton"] button[kind="secondary"]:hover {
+            border-color: rgba(215, 164, 65, 0.55) !important;
+            background: linear-gradient(135deg, rgba(125, 211, 252, 0.18), rgba(215, 164, 65, 0.2)) !important;
+        }
+
+        div[data-testid="stButton"] button[kind="secondary"] p {
+            color: var(--yl-text) !important;
+            font-size: 0.96rem;
+            font-weight: 700;
         }
 
         div[data-testid="stSegmentedControl"] button {

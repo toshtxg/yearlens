@@ -259,6 +259,10 @@ def _default_long_range_metric_label() -> str:
     return "Average"
 
 
+def _trend_reveal_key() -> str:
+    return "yearlens_trends_visible_v1"
+
+
 def _long_range_note_title(scope: str) -> str:
     return "Peak age" if scope == "lifetime" else "Peak year"
 
@@ -279,135 +283,135 @@ def _long_range_meta_label(row: dict, metric_key: str, domain: str, scope: str) 
 
 
 def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) -> None:
-    with st.expander("Open long-range pillar trend: birth to age 80, average view by default", expanded=False):
-        st.caption("Open this only when you want the longer arc. It starts on Life to 80 with Average so you can scan the full pattern first.")
+    st.markdown("<div class='yearlens-section-title'>Long-range pillar trend</div>", unsafe_allow_html=True)
+    st.caption("Hover a point to see the year, age, value, and the strongest window inside that year.")
 
-        scope_label = st.segmented_control(
-            "Trend range",
-            options=["Coming years", "Life to 80"],
-            default=_default_long_range_scope_label(),
-            selection_mode="single",
-            width="content",
-            label_visibility="collapsed",
-            key="yearlens_trend_scope_v2",
-        )
-        metric_label = st.segmented_control(
-            "Trend metric",
-            options=["Average", "P80"],
-            default=_default_long_range_metric_label(),
-            selection_mode="single",
-            width="content",
-            label_visibility="collapsed",
-            key="yearlens_trend_metric_v2",
-        )
-        metric_key = "p80" if metric_label == "P80" else "average"
-        scope = "lifetime" if scope_label == "Life to 80" else "coming_years"
-        st.caption("Average shows the general pull across the year. P80 shows the stronger end of the year without relying on just one single peak window.")
+    scope_label = st.segmented_control(
+        "Trend range",
+        options=["Coming years", "Life to 80"],
+        default=_default_long_range_scope_label(),
+        selection_mode="single",
+        width="content",
+        label_visibility="collapsed",
+        key="yearlens_trend_scope_v3",
+    )
+    metric_label = st.segmented_control(
+        "Trend metric",
+        options=["Average", "P80"],
+        default=_default_long_range_metric_label(),
+        selection_mode="single",
+        width="content",
+        label_visibility="collapsed",
+        key="yearlens_trend_metric_v3",
+    )
+    metric_key = "p80" if metric_label == "P80" else "average"
+    scope = "lifetime" if scope_label == "Life to 80" else "coming_years"
+    st.caption("Average shows the general pull across the year. P80 shows the stronger end of the year without relying on just one single peak window.")
 
-        years_to_show = 5
-        if scope == "coming_years":
-            years_to_show = int(
-                st.segmented_control(
-                    "Years to compare",
-                    options=[3, 5, 7],
-                    default=5,
-                    selection_mode="single",
-                    width="content",
-                    label_visibility="collapsed",
-                    key="yearlens_future_years_v2",
-                )
-                or 5
+    years_to_show = 5
+    if scope == "coming_years":
+        years_to_show = int(
+            st.segmented_control(
+                "Years to compare",
+                options=[3, 5, 7],
+                default=5,
+                selection_mode="single",
+                width="content",
+                label_visibility="collapsed",
+                key="yearlens_future_years_v3",
             )
-
-        trend_rows = _load_domain_trends(metadata["input_snapshot"], scope, years_to_show, 80)
-        trend_frame = pd.DataFrame(
-            [
-                {
-                    "year": row["target_year"],
-                    "age": row["age"],
-                    "annual_score": row["domain_metrics"][selected_domain][metric_key],
-                    "window": _format_window_text(
-                        row["peak_windows"][selected_domain]["start_date"],
-                        row["peak_windows"][selected_domain]["end_date"],
-                    ),
-                    "window_score": row["peak_windows"][selected_domain]["score"],
-                    "headline": row["peak_windows"][selected_domain]["headline"],
-                    "tone": TONE_UI[row["peak_windows"][selected_domain]["tone"]]["label"],
-                    "domain_display": f"{DOMAIN_EMOJIS[selected_domain]} {DOMAIN_LABELS[selected_domain]}",
-                }
-                for row in trend_rows
-            ]
+            or 5
         )
 
-        accent = DOMAIN_TREND_COLORS[selected_domain]
-        x_encoding = (
-            alt.X("age:Q", title="Age", axis=alt.Axis(labelColor="#8fa0bc", domain=False, grid=False))
-            if scope == "lifetime"
-            else alt.X("year:O", title=None, axis=alt.Axis(labelColor="#8fa0bc", labelAngle=0, domain=False, grid=False))
-        )
-        tooltip = [
-            alt.Tooltip("year:O", title="Year"),
-            alt.Tooltip("age:Q", title="Age"),
-            alt.Tooltip("domain_display:N", title="Pillar"),
-            alt.Tooltip("annual_score:Q", title=_metric_label(metric_key), format=".1f"),
-            alt.Tooltip("window:N", title="Strongest window"),
-            alt.Tooltip("window_score:Q", title="Peak window value", format=".1f"),
-            alt.Tooltip("tone:N", title="Tone"),
-            alt.Tooltip("headline:N", title="Reading"),
-        ]
-        chart = (
-            alt.Chart(trend_frame)
-            .mark_line(color=accent, strokeWidth=3, point=alt.OverlayMarkDef(color=accent, size=95, stroke="#0b1120", strokeWidth=2))
-            .encode(
-                x=x_encoding,
-                y=alt.Y(
-                    "annual_score:Q",
-                    title=_metric_label(metric_key),
-                    scale=alt.Scale(domain=[0, 10]),
-                    axis=alt.Axis(values=[0, 2, 4, 6, 8, 10], labelColor="#8fa0bc", titleColor="#8fa0bc", gridColor="rgba(148, 163, 184, 0.14)"),
+    trend_rows = _load_domain_trends(metadata["input_snapshot"], scope, years_to_show, 80)
+    trend_frame = pd.DataFrame(
+        [
+            {
+                "year": row["target_year"],
+                "age": row["age"],
+                "annual_score": row["domain_metrics"][selected_domain][metric_key],
+                "window": _format_window_text(
+                    row["peak_windows"][selected_domain]["start_date"],
+                    row["peak_windows"][selected_domain]["end_date"],
                 ),
-                tooltip=tooltip,
-            )
-            .properties(height=240)
-            .configure_view(strokeOpacity=0)
-            .configure_axis(labelFont="Manrope", titleFont="Manrope")
-            .configure(background="transparent")
-        )
-        st.altair_chart(chart, use_container_width=True)
+                "window_score": row["peak_windows"][selected_domain]["score"],
+                "headline": row["peak_windows"][selected_domain]["headline"],
+                "tone": TONE_UI[row["peak_windows"][selected_domain]["tone"]]["label"],
+                "domain_display": f"{DOMAIN_EMOJIS[selected_domain]} {DOMAIN_LABELS[selected_domain]}",
+            }
+            for row in trend_rows
+        ]
+    )
 
-        peak_year = max(trend_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
-        low_year = min(trend_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
-        strongest_window_year = max(trend_rows, key=lambda item: item["peak_windows"][selected_domain]["score"])
-
-        peak_window = peak_year["peak_windows"][selected_domain]
-        strongest_window = strongest_window_year["peak_windows"][selected_domain]
-        low_window = low_year["peak_windows"][selected_domain]
-
-        st.markdown(
-            (
-                "<div class='yearlens-future-note-grid'>"
-                "<div class='yearlens-trend-note yearlens-trend-note-peak'>"
-                f"<div class='yearlens-trend-note-kicker'>{_long_range_note_title(scope)}</div>"
-                f"<div class='yearlens-trend-note-score'>{_long_range_score_label(peak_year, scope)}</div>"
-                f"<div class='yearlens-trend-note-window'>{escape(_long_range_meta_label(peak_year, metric_key, selected_domain, scope))}</div>"
-                f"<div class='yearlens-trend-note-copy'>{escape(_format_window_text(peak_window['start_date'], peak_window['end_date']))} · {escape(peak_window['headline'])}</div>"
-                "</div>"
-                "<div class='yearlens-trend-note yearlens-trend-note-highlight'>"
-                "<div class='yearlens-trend-note-kicker'>Strongest window</div>"
-                f"<div class='yearlens-trend-note-score'>{_long_range_score_label(strongest_window_year, scope)}</div>"
-                f"<div class='yearlens-trend-note-window'>{strongest_window['score']}/10 · {escape(_format_window_text(strongest_window['start_date'], strongest_window['end_date']))}</div>"
-                f"<div class='yearlens-trend-note-copy'>{escape(strongest_window['headline'])}</div>"
-                "</div>"
-                "<div class='yearlens-trend-note yearlens-trend-note-low'>"
-                f"<div class='yearlens-trend-note-kicker'>{_long_range_quiet_title(scope)}</div>"
-                f"<div class='yearlens-trend-note-score'>{_long_range_score_label(low_year, scope)}</div>"
-                f"<div class='yearlens-trend-note-window'>{escape(_long_range_meta_label(low_year, metric_key, selected_domain, scope))}</div>"
-                f"<div class='yearlens-trend-note-copy'>{escape(_format_window_text(low_window['start_date'], low_window['end_date']))} · {escape(low_window['headline'])}</div>"
-                "</div>"
-                "</div>"
+    accent = DOMAIN_TREND_COLORS[selected_domain]
+    x_encoding = (
+        alt.X("age:Q", title="Age", axis=alt.Axis(labelColor="#8fa0bc", domain=False, grid=False))
+        if scope == "lifetime"
+        else alt.X("year:O", title=None, axis=alt.Axis(labelColor="#8fa0bc", labelAngle=0, domain=False, grid=False))
+    )
+    tooltip = [
+        alt.Tooltip("year:O", title="Year"),
+        alt.Tooltip("age:Q", title="Age"),
+        alt.Tooltip("domain_display:N", title="Pillar"),
+        alt.Tooltip("annual_score:Q", title=_metric_label(metric_key), format=".1f"),
+        alt.Tooltip("window:N", title="Strongest window"),
+        alt.Tooltip("window_score:Q", title="Peak window value", format=".1f"),
+        alt.Tooltip("tone:N", title="Tone"),
+        alt.Tooltip("headline:N", title="Reading"),
+    ]
+    chart = (
+        alt.Chart(trend_frame)
+        .mark_line(color=accent, strokeWidth=3, point=alt.OverlayMarkDef(color=accent, size=95, stroke="#0b1120", strokeWidth=2))
+        .encode(
+            x=x_encoding,
+            y=alt.Y(
+                "annual_score:Q",
+                title=_metric_label(metric_key),
+                scale=alt.Scale(domain=[0, 10]),
+                axis=alt.Axis(values=[0, 2, 4, 6, 8, 10], labelColor="#8fa0bc", titleColor="#8fa0bc", gridColor="rgba(148, 163, 184, 0.14)"),
             ),
-            unsafe_allow_html=True,
+            tooltip=tooltip,
         )
+        .properties(height=240)
+        .configure_view(strokeOpacity=0)
+        .configure_axis(labelFont="Manrope", titleFont="Manrope")
+        .configure(background="transparent")
+    )
+    st.altair_chart(chart, use_container_width=True)
+
+    peak_year = max(trend_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
+    low_year = min(trend_rows, key=lambda item: item["domain_metrics"][selected_domain][metric_key])
+    strongest_window_year = max(trend_rows, key=lambda item: item["peak_windows"][selected_domain]["score"])
+
+    peak_window = peak_year["peak_windows"][selected_domain]
+    strongest_window = strongest_window_year["peak_windows"][selected_domain]
+    low_window = low_year["peak_windows"][selected_domain]
+
+    st.markdown(
+        (
+            "<div class='yearlens-future-note-grid'>"
+            "<div class='yearlens-trend-note yearlens-trend-note-peak'>"
+            f"<div class='yearlens-trend-note-kicker'>{_long_range_note_title(scope)}</div>"
+            f"<div class='yearlens-trend-note-score'>{_long_range_score_label(peak_year, scope)}</div>"
+            f"<div class='yearlens-trend-note-window'>{escape(_long_range_meta_label(peak_year, metric_key, selected_domain, scope))}</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(_format_window_text(peak_window['start_date'], peak_window['end_date']))} · {escape(peak_window['headline'])}</div>"
+            "</div>"
+            "<div class='yearlens-trend-note yearlens-trend-note-highlight'>"
+            "<div class='yearlens-trend-note-kicker'>Strongest window</div>"
+            f"<div class='yearlens-trend-note-score'>{_long_range_score_label(strongest_window_year, scope)}</div>"
+            f"<div class='yearlens-trend-note-window'>{strongest_window['score']}/10 · {escape(_format_window_text(strongest_window['start_date'], strongest_window['end_date']))}</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(strongest_window['headline'])}</div>"
+            "</div>"
+            "<div class='yearlens-trend-note yearlens-trend-note-low'>"
+            f"<div class='yearlens-trend-note-kicker'>{_long_range_quiet_title(scope)}</div>"
+            f"<div class='yearlens-trend-note-score'>{_long_range_score_label(low_year, scope)}</div>"
+            f"<div class='yearlens-trend-note-window'>{escape(_long_range_meta_label(low_year, metric_key, selected_domain, scope))}</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(_format_window_text(low_window['start_date'], low_window['end_date']))} · {escape(low_window['headline'])}</div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 def render_year_timeline_bar(periods: list[dict]) -> None:
@@ -755,8 +759,16 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
 
     _render_tone_summary_chips(overview["tone_summary"])
     _render_domain_emphasis(overview)
-    selected_domain = _render_domain_trend_chart(periods, overview)
-    _render_multi_year_domain_trend_chart(metadata, selected_domain)
+    if _trend_reveal_key() not in st.session_state:
+        st.session_state[_trend_reveal_key()] = False
+
+    button_label = "Click / Tap to open Trends" if not st.session_state[_trend_reveal_key()] else "Hide Trends"
+    if st.button(button_label, key="yearlens_trend_reveal_button", type="secondary"):
+        st.session_state[_trend_reveal_key()] = not st.session_state[_trend_reveal_key()]
+
+    if st.session_state[_trend_reveal_key()]:
+        selected_domain = _render_domain_trend_chart(periods, overview)
+        _render_multi_year_domain_trend_chart(metadata, selected_domain)
 
     col1, col2, col3 = st.columns(3, gap="small")
     with col1:
