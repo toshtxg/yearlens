@@ -54,7 +54,7 @@ def render_input_form() -> dict | None:
             name = st.text_input("Display name", value="", placeholder="Optional")
             st.caption("Manual coordinates and timezone let you bypass place-name lookup for more repeatable results and better privacy.")
 
-        submitted = st.form_submit_button("Generate Reading", use_container_width=True)
+        submitted = st.form_submit_button("Generate Reading", width="stretch")
 
     if not submitted:
         return None

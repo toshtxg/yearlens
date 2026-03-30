@@ -248,7 +248,7 @@ def _render_domain_trend_chart(periods: list[dict], overview: dict) -> None:
         .configure_axis(labelFont="Manrope", titleFont="Manrope")
         .configure(background="transparent")
     )
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
     extremes = _summarize_domain_extremes(periods, selected_domain)
     peak = extremes["peak"]
@@ -491,7 +491,7 @@ def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) 
         .configure_axis(labelFont="Manrope", titleFont="Manrope")
         .configure(background="transparent")
     )
-    st.altair_chart(chart, use_container_width=True)
+    st.altair_chart(chart, width="stretch")
 
     summary_rows = _summary_trend_rows(trend_rows, scope, metadata["input_snapshot"])
 
