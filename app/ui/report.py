@@ -10,6 +10,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from app.core.config import DOMAINS, DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
+from app.core.input_schema import UserInput
+from app.core.trend_engine import build_multi_year_domain_trends
 
 
 DOMAIN_TREND_COLORS = {
@@ -228,6 +230,114 @@ def _render_domain_trend_chart(periods: list[dict], overview: dict) -> None:
             f"<div class='yearlens-trend-note-score'>{low['score']}/10</div>"
             f"<div class='yearlens-trend-note-window'>{escape(low['window'])}</div>"
             f"<div class='yearlens-trend-note-copy'>{escape(low['headline'])}</div>"
+            "</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    return selected_domain
+
+
+@st.cache_data(show_spinner=False)
+def _load_multi_year_domain_trends(input_snapshot: dict, years_to_show: int) -> list[dict]:
+    user_input = UserInput.model_validate(input_snapshot)
+    return build_multi_year_domain_trends(user_input, years_to_show=years_to_show)
+
+
+def _render_multi_year_domain_trend_chart(metadata: dict, selected_domain: str) -> None:
+    st.markdown("<div class='yearlens-section-title'>How this pillar trends across the coming years</div>", unsafe_allow_html=True)
+    st.caption("Use this to spot the years that carry more weight overall, then hover any point to see the strongest window inside that year.")
+
+    years_to_show = int(
+        st.segmented_control(
+            "Years to compare",
+            options=[3, 5, 7],
+            default=5,
+            selection_mode="single",
+            width="content",
+            label_visibility="collapsed",
+            key="yearlens_future_years",
+        )
+        or 5
+    )
+
+    trend_rows = _load_multi_year_domain_trends(metadata["input_snapshot"], years_to_show)
+    trend_frame = pd.DataFrame(
+        [
+            {
+                "year": row["target_year"],
+                "annual_score": row["domain_totals"][selected_domain],
+                "window": _format_window_text(
+                    row["peak_windows"][selected_domain]["start_date"],
+                    row["peak_windows"][selected_domain]["end_date"],
+                ),
+                "window_score": row["peak_windows"][selected_domain]["score"],
+                "headline": row["peak_windows"][selected_domain]["headline"],
+                "tone": TONE_UI[row["peak_windows"][selected_domain]["tone"]]["label"],
+                "domain_display": f"{DOMAIN_EMOJIS[selected_domain]} {DOMAIN_LABELS[selected_domain]}",
+            }
+            for row in trend_rows
+        ]
+    )
+
+    accent = DOMAIN_TREND_COLORS[selected_domain]
+    chart = (
+        alt.Chart(trend_frame)
+        .mark_line(color=accent, strokeWidth=3, point=alt.OverlayMarkDef(color=accent, size=95, stroke="#0b1120", strokeWidth=2))
+        .encode(
+            x=alt.X("year:O", title=None, axis=alt.Axis(labelColor="#8fa0bc", labelAngle=0, domain=False, grid=False)),
+            y=alt.Y(
+                "annual_score:Q",
+                title="Year score",
+                scale=alt.Scale(domain=[0, 10]),
+                axis=alt.Axis(values=[0, 2, 4, 6, 8, 10], labelColor="#8fa0bc", titleColor="#8fa0bc", gridColor="rgba(148, 163, 184, 0.14)"),
+            ),
+            tooltip=[
+                alt.Tooltip("year:O", title="Year"),
+                alt.Tooltip("domain_display:N", title="Pillar"),
+                alt.Tooltip("annual_score:Q", title="Overall pull", format=".1f"),
+                alt.Tooltip("window:N", title="Strongest window"),
+                alt.Tooltip("window_score:Q", title="Peak window value", format=".1f"),
+                alt.Tooltip("tone:N", title="Tone"),
+                alt.Tooltip("headline:N", title="Reading"),
+            ],
+        )
+        .properties(height=240)
+        .configure_view(strokeOpacity=0)
+        .configure_axis(labelFont="Manrope", titleFont="Manrope")
+        .configure(background="transparent")
+    )
+    st.altair_chart(chart, use_container_width=True)
+
+    peak_year = max(trend_rows, key=lambda item: item["domain_totals"][selected_domain])
+    low_year = min(trend_rows, key=lambda item: item["domain_totals"][selected_domain])
+    strongest_window_year = max(trend_rows, key=lambda item: item["peak_windows"][selected_domain]["score"])
+
+    peak_window = peak_year["peak_windows"][selected_domain]
+    strongest_window = strongest_window_year["peak_windows"][selected_domain]
+    low_window = low_year["peak_windows"][selected_domain]
+
+    st.markdown(
+        (
+            "<div class='yearlens-future-note-grid'>"
+            "<div class='yearlens-trend-note yearlens-trend-note-peak'>"
+            "<div class='yearlens-trend-note-kicker'>Peak year</div>"
+            f"<div class='yearlens-trend-note-score'>{peak_year['target_year']}</div>"
+            f"<div class='yearlens-trend-note-window'>Overall pull {peak_year['domain_totals'][selected_domain]:.1f}/10</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(_format_window_text(peak_window['start_date'], peak_window['end_date']))} · {escape(peak_window['headline'])}</div>"
+            "</div>"
+            "<div class='yearlens-trend-note yearlens-trend-note-highlight'>"
+            "<div class='yearlens-trend-note-kicker'>Strongest window</div>"
+            f"<div class='yearlens-trend-note-score'>{strongest_window_year['target_year']}</div>"
+            f"<div class='yearlens-trend-note-window'>{strongest_window['score']}/10 · {escape(_format_window_text(strongest_window['start_date'], strongest_window['end_date']))}</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(strongest_window['headline'])}</div>"
+            "</div>"
+            "<div class='yearlens-trend-note yearlens-trend-note-low'>"
+            "<div class='yearlens-trend-note-kicker'>Quieter year</div>"
+            f"<div class='yearlens-trend-note-score'>{low_year['target_year']}</div>"
+            f"<div class='yearlens-trend-note-window'>Overall pull {low_year['domain_totals'][selected_domain]:.1f}/10</div>"
+            f"<div class='yearlens-trend-note-copy'>{escape(_format_window_text(low_window['start_date'], low_window['end_date']))} · {escape(low_window['headline'])}</div>"
             "</div>"
             "</div>"
         ),
@@ -580,7 +690,8 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
 
     _render_tone_summary_chips(overview["tone_summary"])
     _render_domain_emphasis(overview)
-    _render_domain_trend_chart(periods, overview)
+    selected_domain = _render_domain_trend_chart(periods, overview)
+    _render_multi_year_domain_trend_chart(metadata, selected_domain)
 
     col1, col2, col3 = st.columns(3, gap="small")
     with col1:

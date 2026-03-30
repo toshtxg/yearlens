@@ -517,6 +517,13 @@ def inject_global_styles() -> None:
             margin: 0.35rem 0 0.95rem 0;
         }
 
+        .yearlens-future-note-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.7rem;
+            margin: 0.35rem 0 0.95rem 0;
+        }
+
         .yearlens-trend-note {
             border: 1px solid rgba(148, 163, 184, 0.16);
             border-radius: 18px;
@@ -530,6 +537,10 @@ def inject_global_styles() -> None:
 
         .yearlens-trend-note-low {
             border-color: rgba(125, 211, 252, 0.18);
+        }
+
+        .yearlens-trend-note-highlight {
+            border-color: rgba(251, 191, 36, 0.22);
         }
 
         .yearlens-trend-note-kicker {
@@ -989,7 +1000,8 @@ def inject_global_styles() -> None:
         @media (max-width: 900px) {
             .yearlens-domain-emphasis-grid,
             .yearlens-score-grid,
-            .yearlens-trend-note-grid {
+            .yearlens-trend-note-grid,
+            .yearlens-future-note-grid {
                 grid-template-columns: 1fr;
             }
         }
