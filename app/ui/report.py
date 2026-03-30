@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import date
 from html import escape
 
@@ -109,7 +110,9 @@ def render_year_timeline_bar(periods: list[dict]) -> None:
 
     total_days = sum(_period_duration(period) for period in periods) or 1
     segments = []
+    segment_payload = []
     tone_order: list[str] = []
+    component_id = f"ylr-{periods[0]['start_date'].replace('-', '')}-{periods[-1]['end_date'].replace('-', '')}-{len(periods)}"
     for period in periods:
         tone = period["tone"]
         if tone not in tone_order:
@@ -118,41 +121,254 @@ def render_year_timeline_bar(periods: list[dict]) -> None:
         size_class = _timeline_segment_size(width)
         label_html = _render_segment_label(period["start_date"], period["end_date"], size_class)
         window_text = _format_window_text(period["start_date"], period["end_date"])
-        tooltip = f"{window_text} • {TONE_UI[tone]['label']} • {period['headline']}"
+        segment_payload.append(
+            {
+                "window": window_text,
+                "tone": TONE_UI[tone]["label"],
+                "headline": period["headline"],
+                "description": TONE_UI[tone]["description"],
+            }
+        )
         segments.append(
             (
-                f"<details class='yearlens-timeline-slot yearlens-timeline-slot--{size_class}' style='width:{width:.2f}%;'>"
-                f"<summary class='yearlens-timeline-segment' style='background:{TONE_COLORS[tone]};' title='{escape(tooltip)}' aria-label='{escape(tooltip)}'>"
+                f"<button type='button' class='ylr-segment ylr-segment--{size_class}' "
+                f"data-index='{len(segment_payload) - 1}' "
+                f"style='width:{width:.2f}%; background:{TONE_COLORS[tone]};' "
+                f"aria-label='{escape(window_text)}. {escape(TONE_UI[tone]['label'])}. {escape(period['headline'])}'>"
                 f"{label_html}"
-                "</summary>"
-                "<div class='yearlens-timeline-popover' role='note'>"
-                f"<div class='yearlens-timeline-popover-range'>{escape(window_text)}</div>"
-                f"<div class='yearlens-timeline-popover-tone'>{escape(TONE_UI[tone]['label'])}</div>"
-                f"<div class='yearlens-timeline-popover-copy'>{escape(period['headline'])}</div>"
-                "</div>"
-                "</details>"
+                "</button>"
             )
         )
 
     legend_items = "".join(
         (
-            "<span class='yearlens-timeline-legend-item'>"
-            f"<span class='yearlens-tone-dot' style='background:{TONE_COLORS[tone]};'></span>"
+            "<span class='ylr-legend-item'>"
+            f"<span class='ylr-dot' style='background:{TONE_COLORS[tone]};'></span>"
             f"{escape(TONE_UI[tone]['label'])}"
             "</span>"
         )
         for tone in tone_order
     )
 
-    st.markdown(
-        (
-            "<div class='yearlens-year-rhythm'>"
-            "<div class='yearlens-section-title yearlens-section-title-inline'>Year rhythm</div>"
-            f"<div class='yearlens-timeline-bar'>{''.join(segments)}</div>"
-            f"<div class='yearlens-timeline-legend'>{legend_items}</div>"
-            "</div>"
-        ),
-        unsafe_allow_html=True,
+    body = f"""
+    <div id="{component_id}" class="ylr-shell">
+      <style>
+        #{component_id}.ylr-shell {{
+          border: 1px solid rgba(148, 163, 184, 0.16);
+          border-radius: 20px;
+          padding: 0.85rem 0.9rem 0.9rem 0.9rem;
+          background: rgba(18, 28, 44, 0.72);
+          margin-bottom: 0.85rem;
+          font-family: "Manrope", sans-serif;
+          color: #eef2ff;
+        }}
+        #{component_id} .ylr-title {{
+          font-size: 0.9rem;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+          color: #eef2ff;
+          margin: 0 0 0.6rem 0;
+          line-height: 1.2;
+        }}
+        #{component_id} .ylr-bar {{
+          display: flex;
+          width: 100%;
+          min-height: 4rem;
+          gap: 3px;
+          align-items: stretch;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 14px;
+          overflow: hidden;
+        }}
+        #{component_id} .ylr-segment {{
+          border: none;
+          border-radius: 12px;
+          min-height: 4rem;
+          padding: 0.3rem 0.32rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-weight: 800;
+          color: #111827;
+          line-height: 1.05;
+          cursor: pointer;
+          transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+          font-family: inherit;
+        }}
+        #{component_id} .ylr-segment:hover,
+        #{component_id} .ylr-segment:focus-visible,
+        #{component_id} .ylr-segment.is-active {{
+          transform: translateY(-1px);
+          filter: brightness(1.02);
+          box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.22);
+          outline: none;
+        }}
+        #{component_id} .ylr-label {{
+          display: block;
+          max-width: 100%;
+          font-size: 0.76rem;
+        }}
+        #{component_id} .ylr-label-stack {{
+          display: flex;
+          flex-direction: column;
+          gap: 0.04rem;
+          align-items: center;
+          font-size: 0.68rem;
+        }}
+        #{component_id} .ylr-segment--compact {{
+          padding: 0;
+        }}
+        #{component_id} .ylr-segment--compact .ylr-label {{
+          display: none;
+        }}
+        #{component_id} .ylr-detail {{
+          margin-top: 0.72rem;
+          border: 1px solid rgba(148, 163, 184, 0.16);
+          border-radius: 16px;
+          padding: 0.8rem 0.85rem;
+          background: rgba(12, 18, 32, 0.9);
+          min-height: 5rem;
+        }}
+        #{component_id} .ylr-detail-hint {{
+          color: #c8d1e4;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }}
+        #{component_id} .ylr-detail-meta {{
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.45rem;
+          margin-bottom: 0.45rem;
+        }}
+        #{component_id} .ylr-detail-pill {{
+          display: inline-flex;
+          align-items: center;
+          gap: 0.38rem;
+          padding: 0.34rem 0.62rem;
+          border-radius: 999px;
+          background: rgba(42, 56, 86, 0.72);
+          border: 1px solid rgba(148, 163, 184, 0.16);
+          color: #eef2ff;
+          font-size: 0.82rem;
+          font-weight: 700;
+        }}
+        #{component_id} .ylr-dot {{
+          width: 0.62rem;
+          height: 0.62rem;
+          border-radius: 999px;
+          flex: 0 0 auto;
+          box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+        }}
+        #{component_id} .ylr-detail-copy {{
+          color: #eef2ff;
+          font-size: 0.96rem;
+          line-height: 1.45;
+          font-weight: 700;
+          margin-bottom: 0.16rem;
+        }}
+        #{component_id} .ylr-detail-sub {{
+          color: #8fa0bc;
+          font-size: 0.88rem;
+          line-height: 1.45;
+        }}
+        #{component_id} .ylr-legend {{
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          margin-top: 0.7rem;
+        }}
+        #{component_id} .ylr-legend-item {{
+          display: inline-flex;
+          align-items: center;
+          gap: 0.45rem;
+          padding: 0.4rem 0.7rem;
+          border-radius: 999px;
+          background: rgba(26, 38, 61, 0.72);
+          border: 1px solid rgba(148, 163, 184, 0.14);
+          color: #eef2ff;
+          font-size: 0.88rem;
+          font-weight: 700;
+        }}
+        @media (max-width: 700px) {{
+          #{component_id} .ylr-bar {{
+            min-height: 3.7rem;
+            gap: 2px;
+          }}
+          #{component_id} .ylr-segment--wide .ylr-label {{
+            font-size: 0.66rem;
+          }}
+          #{component_id} .ylr-segment--medium .ylr-label-stack {{
+            font-size: 0.6rem;
+          }}
+          #{component_id} .ylr-segment--medium {{
+            padding: 0.2rem 0.16rem;
+          }}
+        }}
+      </style>
+      <div class="ylr-title">Year rhythm</div>
+      <div class="ylr-bar" data-role="bar">{''.join(segments)}</div>
+      <div class="ylr-detail" data-role="detail">
+        <div class="ylr-detail-hint">Hover on desktop or tap on mobile to preview what each stretch is about.</div>
+      </div>
+      <div class="ylr-legend">{legend_items}</div>
+    </div>
+    <script>
+      (() => {{
+        const root = document.getElementById({json.dumps(component_id)});
+        if (!root) return;
+        const detail = root.querySelector('[data-role="detail"]');
+        const segments = Array.from(root.querySelectorAll('.ylr-segment'));
+        const items = {json.dumps(segment_payload)};
+        let pinnedIndex = null;
+
+        const renderPlaceholder = () => {{
+          detail.innerHTML = '<div class="ylr-detail-hint">Hover on desktop or tap on mobile to preview what each stretch is about.</div>';
+          segments.forEach((segment) => segment.classList.remove('is-active'));
+        }};
+
+        const renderItem = (index, persist = false) => {{
+          const item = items[index];
+          if (!item) return;
+          if (persist) pinnedIndex = index;
+          segments.forEach((segment, currentIndex) => segment.classList.toggle('is-active', currentIndex === index));
+          detail.innerHTML = `
+            <div class="ylr-detail-meta">
+              <span class="ylr-detail-pill">${{item.window}}</span>
+              <span class="ylr-detail-pill"><span class="ylr-dot" style="background:${{segments[index].style.background}};"></span>${{item.tone}}</span>
+            </div>
+            <div class="ylr-detail-copy">${{item.headline}}</div>
+            <div class="ylr-detail-sub">${{item.description}}</div>
+          `;
+        }};
+
+        segments.forEach((segment, index) => {{
+          segment.addEventListener('mouseenter', () => renderItem(index));
+          segment.addEventListener('focus', () => renderItem(index));
+          segment.addEventListener('click', (event) => {{
+            event.preventDefault();
+            renderItem(index, true);
+          }});
+          segment.addEventListener('touchstart', () => renderItem(index, true), {{ passive: true }});
+        }});
+
+        root.querySelector('[data-role="bar"]').addEventListener('mouseleave', () => {{
+          if (pinnedIndex === null) {{
+            renderPlaceholder();
+            return;
+          }}
+          renderItem(pinnedIndex, true);
+        }});
+
+        renderPlaceholder();
+      }})();
+    </script>
+    """
+
+    st.html(
+        body,
+        width="stretch",
+        unsafe_allow_javascript=True,
     )
 
 
@@ -172,14 +388,14 @@ def _timeline_segment_size(width: float) -> str:
 
 def _render_segment_label(start_value: str, end_value: str, size_class: str) -> str:
     if size_class == "compact":
-        return "<span class='yearlens-timeline-segment-label yearlens-timeline-segment-label-hidden'></span>"
+        return "<span class='ylr-label'></span>"
 
     start = date.fromisoformat(start_value)
     end = date.fromisoformat(end_value)
 
     if size_class == "medium":
         return (
-            "<span class='yearlens-timeline-segment-label yearlens-timeline-segment-label-stack'>"
+            "<span class='ylr-label ylr-label-stack'>"
             f"<span>{escape(start.strftime('%b'))} {start.day}</span>"
             f"<span>{escape(end.strftime('%b'))} {end.day}</span>"
             "</span>"
@@ -187,13 +403,13 @@ def _render_segment_label(start_value: str, end_value: str, size_class: str) -> 
 
     if start.month == end.month:
         return (
-            "<span class='yearlens-timeline-segment-label'>"
+            "<span class='ylr-label'>"
             f"{escape(start.strftime('%b'))} {start.day}-{end.day}"
             "</span>"
         )
 
     return (
-        "<span class='yearlens-timeline-segment-label yearlens-timeline-segment-label-stack'>"
+        "<span class='ylr-label ylr-label-stack'>"
         f"<span>{escape(start.strftime('%b'))} {start.day}</span>"
         f"<span>{escape(end.strftime('%b'))} {end.day}</span>"
         "</span>"
