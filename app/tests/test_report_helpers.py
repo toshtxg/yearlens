@@ -3,6 +3,7 @@ from app.ui.report import (
     _build_domain_trend_frame,
     _default_long_range_metric_label,
     _default_long_range_scope_label,
+    _long_range_score_label,
     _summarize_domain_extremes,
     _trend_report_key,
 )
@@ -102,3 +103,8 @@ def test_trend_report_key_changes_with_report_identity() -> None:
     }
 
     assert _trend_report_key(metadata_a) != _trend_report_key(metadata_b)
+
+
+def test_long_range_score_label_uses_birth_year_for_age_zero() -> None:
+    assert _long_range_score_label({"age": 0, "target_year": 1990}, "lifetime") == "Birth year"
+    assert _long_range_score_label({"age": 5, "target_year": 1995}, "lifetime") == "Age 5"

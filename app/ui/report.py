@@ -288,6 +288,8 @@ def _long_range_quiet_title(scope: str) -> str:
 
 def _long_range_score_label(row: dict, scope: str) -> str:
     if scope == "lifetime":
+        if row["age"] == 0:
+            return "Birth year"
         return f"Age {row['age']}"
     return str(row["target_year"])
 
