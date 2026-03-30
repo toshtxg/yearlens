@@ -5,6 +5,7 @@ from datetime import date
 from html import escape
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from app.core.config import DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
 
@@ -151,8 +152,17 @@ def render_year_timeline_bar(periods: list[dict]) -> None:
     )
 
     body = f"""
-    <div id="{component_id}" class="ylr-shell">
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <style>
+        html, body {{
+          margin: 0;
+          padding: 0;
+          background: transparent;
+        }}
         #{component_id}.ylr-shell {{
           border: 1px solid rgba(148, 163, 184, 0.16);
           border-radius: 20px;
@@ -306,6 +316,9 @@ def render_year_timeline_bar(periods: list[dict]) -> None:
           }}
         }}
       </style>
+    </head>
+    <body>
+    <div id="{component_id}" class="ylr-shell">
       <div class="ylr-title">Year rhythm</div>
       <div class="ylr-bar" data-role="bar">{''.join(segments)}</div>
       <div class="ylr-detail" data-role="detail">
@@ -363,13 +376,11 @@ def render_year_timeline_bar(periods: list[dict]) -> None:
         renderPlaceholder();
       }})();
     </script>
+    </body>
+    </html>
     """
 
-    st.html(
-        body,
-        width="stretch",
-        unsafe_allow_javascript=True,
-    )
+    components.html(body, height=320, scrolling=False)
 
 
 def _period_duration(period: dict) -> int:
