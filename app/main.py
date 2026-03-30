@@ -119,11 +119,7 @@ def main() -> None:
         width="content",
         label_visibility="collapsed",
     )
-    render_period_timeline(
-        report["periods"],
-        mode=(mode or "Concise").lower(),
-        target_year=report["metadata"]["input_snapshot"]["target_year"],
-    )
+    render_period_timeline(report["periods"], mode=(mode or "Concise").lower())
     render_report_actions(report)
 
     if st.query_params.get("debug"):

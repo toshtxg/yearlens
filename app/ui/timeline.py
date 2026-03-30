@@ -135,6 +135,12 @@ def _clarity_label(confidence: float) -> str:
     return "Clarity: general direction"
 
 
+def _target_year_from_periods(periods: list[dict]) -> int | None:
+    if not periods:
+        return None
+    return date.fromisoformat(periods[0]["start_date"]).year
+
+
 def _resolve_current_period_id(periods: list[dict], target_year: int, today: date | None = None) -> str | None:
     current_day = today or date.today()
     if target_year != current_day.year:
@@ -150,9 +156,10 @@ def _resolve_current_period_id(periods: list[dict], target_year: int, today: dat
     )
 
 
-def render_period_timeline(periods: list[dict], mode: str, target_year: int) -> None:
+def render_period_timeline(periods: list[dict], mode: str) -> None:
     st.caption("Read each period like a weather shift: headline first, then the focus areas and cautions underneath.")
-    current_period_id = _resolve_current_period_id(periods, target_year)
+    target_year = _target_year_from_periods(periods)
+    current_period_id = _resolve_current_period_id(periods, target_year) if target_year is not None else None
     allow_auto_expand = target_year == date.today().year
 
     for index, period in enumerate(periods):

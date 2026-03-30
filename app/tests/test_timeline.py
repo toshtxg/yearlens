@@ -1,6 +1,15 @@
 from datetime import date
 
-from app.ui.timeline import _resolve_current_period_id
+from app.ui.timeline import _resolve_current_period_id, _target_year_from_periods
+
+
+def test_target_year_from_periods_uses_window_start_year() -> None:
+    periods = [
+        {"id": "p1", "start_date": "2026-01-25", "end_date": "2026-03-04"},
+        {"id": "p2", "start_date": "2026-03-05", "end_date": "2026-04-19"},
+    ]
+
+    assert _target_year_from_periods(periods) == 2026
 
 
 def test_resolve_current_period_id_matches_today_only_for_current_target_year() -> None:
