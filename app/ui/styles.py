@@ -181,6 +181,13 @@ def inject_global_styles() -> None:
             line-height: 1.45;
         }
 
+        .yearlens-build-stamp {
+            margin-top: 0.65rem;
+            font-size: 0.78rem;
+            color: var(--yl-text-muted);
+            letter-spacing: 0.04em;
+        }
+
         div[data-testid="stForm"] {
             padding: 0.95rem 1rem 1rem 1rem;
             margin-top: 0.25rem;

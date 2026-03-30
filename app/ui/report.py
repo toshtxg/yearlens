@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from datetime import date, timedelta
+from functools import lru_cache
 from html import escape
+from pathlib import Path
 
 import altair as alt
 import pandas as pd
@@ -22,6 +26,39 @@ DOMAIN_TREND_COLORS = {
     "travel_overseas": "#c4b5fd",
     "study_growth": "#60a5fa",
 }
+
+BUILD_ENV_KEYS = (
+    "STREAMLIT_GIT_HASH",
+    "GITHUB_SHA",
+    "RENDER_GIT_COMMIT",
+    "RAILWAY_GIT_COMMIT_SHA",
+    "VERCEL_GIT_COMMIT_SHA",
+)
+
+
+@lru_cache(maxsize=1)
+def _runtime_build_ref() -> str:
+    for key in BUILD_ENV_KEYS:
+        value = os.getenv(key)
+        if value:
+            return str(value).strip()[:7]
+
+    repo_root = Path(__file__).resolve().parents[2]
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        value = result.stdout.strip()
+        if value:
+            return value
+    except Exception:
+        pass
+
+    return "unknown"
 
 
 def _render_pill_row(items: list[str]) -> None:
@@ -869,6 +906,7 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
 def render_report_actions(report: dict) -> None:
     metadata = report["metadata"]
     natal_chart = metadata["natal_chart"]
+    build_ref = _runtime_build_ref()
 
     notes = [
         "For reflection and timing, not certainty or guaranteed prediction.",
@@ -885,6 +923,7 @@ def render_report_actions(report: dict) -> None:
             "<div class='yearlens-footer-note-shell'>"
             "<div class='yearlens-footer-note-title'>A few gentle notes</div>"
             f"<ul class='yearlens-footer-note-list'>{notes_html}</ul>"
+            f"<div class='yearlens-build-stamp'>Build: {escape(build_ref)}</div>"
             "</div>"
         ),
         unsafe_allow_html=True,

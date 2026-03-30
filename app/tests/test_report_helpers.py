@@ -8,6 +8,7 @@ from app.ui.report import (
     _default_long_range_metric_label,
     _default_long_range_scope_label,
     _long_range_score_label,
+    _runtime_build_ref,
     _summary_trend_rows,
     _summarize_domain_extremes,
     _trend_report_key,
@@ -143,3 +144,12 @@ def test_current_age_marker_layer_uses_birth_date() -> None:
     marker_layers = _current_age_marker_layer({"birth_date": "1990-03-29"})
 
     assert marker_layers is not None
+
+
+def test_runtime_build_ref_prefers_environment_variable(monkeypatch) -> None:
+    _runtime_build_ref.cache_clear()
+    monkeypatch.setenv("GITHUB_SHA", "abcdef1234567890")
+
+    assert _runtime_build_ref() == "abcdef1"
+
+    _runtime_build_ref.cache_clear()
