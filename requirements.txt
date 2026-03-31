@@ -8,4 +8,5 @@ pytest>=9.0.2
 geopy>=2.4.1
 timezonefinder>=8.2.1
 pysweph>=2.10.3.6
+lunar-python>=1.4.8
 tzdata>=2025.3

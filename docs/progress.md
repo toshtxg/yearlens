@@ -1,6 +1,6 @@
 # YearLens Progress
 
-Last updated: 2026-03-29
+Last updated: 2026-03-30
 
 ## Completed
 
@@ -30,6 +30,9 @@ Last updated: 2026-03-29
 - [x] Added confidence breakdown using event strength, signal agreement, and data quality
 - [x] Added trust/data-handling notes to the report and header
 - [x] Added tests for narrative shape and anchor regression behavior
+- [x] Added a BaZi birth element balance section with exact four-pillar decomposition
+- [x] Added lightweight element meanings and color-based balancing suggestions in the overview
+- [x] Added BaZi regression tests for timezone handling, Li Chun boundaries, and report integration
 
 ## In Progress
 

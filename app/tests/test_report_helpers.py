@@ -7,9 +7,11 @@ from app.ui.report import (
     _current_age_marker_layer,
     _default_long_range_metric_label,
     _default_long_range_scope_label,
+    _elements_reveal_key,
     _long_range_score_label,
     _runtime_build_ref,
     _summary_trend_rows,
+    _sync_report_toggle_state,
     _summarize_domain_extremes,
     _trend_report_key,
 )
@@ -109,6 +111,29 @@ def test_trend_report_key_changes_with_report_identity() -> None:
     }
 
     assert _trend_report_key(metadata_a) != _trend_report_key(metadata_b)
+
+
+def test_sync_report_toggle_state_resets_element_section_for_new_report() -> None:
+    state = {
+        _elements_reveal_key(): True,
+        f"{_elements_reveal_key()}_report": "old-report",
+    }
+    metadata = {
+        "window_start": "2026-01-01",
+        "window_end": "2026-12-31",
+        "input_snapshot": {
+            "birth_date": "1990-01-01",
+            "birth_time": "12:00:00",
+            "birth_location": "Singapore",
+            "target_year": 2026,
+            "year_anchor": "calendar",
+        },
+    }
+
+    _sync_report_toggle_state(state, _elements_reveal_key(), metadata)
+
+    assert state[_elements_reveal_key()] is False
+    assert state[f"{_elements_reveal_key()}_report"] == _trend_report_key(metadata)
 
 
 def test_long_range_score_label_uses_birth_year_for_age_zero() -> None:

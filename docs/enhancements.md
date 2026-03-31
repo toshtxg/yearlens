@@ -3,7 +3,35 @@
 Spec for making YearLens feel polished for everyday (non-technical) users.
 Each section states what to change, where, and exactly how.
 
-Completed: ~~#1 Fix repetitive headlines~~, ~~#2 Soften tone labels~~, ~~#3 Collapse instructions~~, ~~#4 Add a visual year timeline bar~~, ~~#5 Color-code period expander headers by tone~~, ~~#6 Replace or reframe the confidence label~~, ~~#7 Tighten concise mode~~, ~~#8 Highlight the current period~~, ~~#9 Hide debug payload from non-dev users~~, ~~#10 Make the year overview more visual~~
+Completed: ~~#1 Fix repetitive headlines~~, ~~#2 Soften tone labels~~, ~~#3 Collapse instructions~~, ~~#4 Add a visual year timeline bar~~, ~~#5 Color-code period expander headers by tone~~, ~~#6 Replace or reframe the confidence label~~, ~~#7 Tighten concise mode~~, ~~#8 Highlight the current period~~, ~~#9 Hide debug payload from non-dev users~~, ~~#10 Make the year overview more visual~~, ~~#11 Add a collapsed BaZi element balance section~~
+
+---
+
+## 11. Add a collapsed BaZi element balance section
+
+**Problem:** The report explains the selected year well, but there is no compact birth-based element profile for users who want a five-element decomposition and a practical balancing cue.
+
+**Where:** New calculation logic in `app/core/bazi_engine.py`, metadata wiring in `app/main.py`, and overview rendering in `app/ui/report.py`.
+
+**What to render:** A collapsed `Birth Element Balance` section near the top of the year overview that:
+
+- uses the existing birth date, time, location, and resolved timezone
+- shows the four BaZi pillars in compact cards
+- shows the five-element decomposition across the visible eight characters
+- explains what each element tends to mean
+- offers a lightweight recommendation for the weakest element using colors and grounded examples
+
+**Interaction model:** Reuse the same click-to-open / click-to-hide pattern as Trends so the report stays compact by default.
+
+**Implementation notes:**
+
+- compute exact BaZi pillars via `lunar-python`
+- use local civil birth time with timezone resolution from the existing location flow
+- keep the BaZi output separate from the sidereal year-reading engine
+- treat the balancing recommendation as a simple cultural heuristic, not a full favorable-element prescription
+- if three or more elements tie for lowest count, stop at decomposition and skip prescriptive remedy copy
+
+**Codex did:** Added `app/core/bazi_engine.py`, wired `bazi_profile` into `generate_report()` in `app/main.py`, added element metadata in `app/core/config.py`, rendered the collapsed BaZi section and recommendation cards in `app/ui/report.py`, styled the new section in `app/ui/styles.py`, and added test coverage for exact pillars, timezone handling, Li Chun boundaries, tie logic, and report integration.
 
 ---
 

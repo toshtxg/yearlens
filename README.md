@@ -1,6 +1,6 @@
 # YearLens
 
-YearLens is a Streamlit app for personal year-ahead readings built from sidereal astrology. It turns birth details into a natal chart, extracts real yearly transit change points, groups them into readable periods, and presents each period with plain-language guidance.
+YearLens is a Streamlit app for personal year-ahead readings built from sidereal astrology, with an added BaZi birth-profile layer for five-element decomposition. It turns birth details into a natal chart, extracts real yearly transit change points, groups them into readable periods, and presents each period with plain-language guidance alongside a compact birth-based element balance readout.
 
 The project is intentionally optimized for fast solo shipping:
 
@@ -29,6 +29,7 @@ Optional advanced overrides:
 Outputs:
 
 - a year overview
+- a collapsed `Birth Element Balance` section with BaZi four pillars and five-element decomposition
 - a timeline of meaningful periods
 - concise mode for scanning
 - detailed mode for explanation
@@ -41,11 +42,13 @@ Working now:
 
 - validated input flow
 - real `swisseph`-backed natal chart calculation
+- exact BaZi four-pillar calculation via `lunar-python`
 - sidereal zodiac with Lahiri ayanamsa
 - whole-sign houses
 - true or mean node handling
 - yearly transit change points from ingresses, retrograde stations, and eclipse dates
 - period segmentation into a readable timeline
+- five-element decomposition from the visible BaZi pillars with element meanings and simple color-based balancing suggestions
 - weighted period-by-period guidance for decisions, politics, relationships, money, health, travel, and work
 - plain-English period headlines and setup-first explanations for signs, houses, and transit events
 - confidence breakdown based on event strength, signal agreement, and data quality
@@ -141,6 +144,7 @@ Defined in [.env.example](.env.example):
 
 - if `SWISSEPH_EPHE_PATH` is not set, the wrapper may use the Moshier fallback backend
 - timezone correctness still matters a lot for birth-time-sensitive outputs
+- the BaZi balancing section is a lightweight cultural heuristic, not a full favorable-element or classical remedy engine
 - the interpretation layer is heuristic and still being tuned
 - the app keeps the generated report in the current session and does not write it to a database or report file by default
 - the app is for reflection and guidance, not certainty or guaranteed prediction
