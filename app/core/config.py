@@ -22,6 +22,81 @@ DOMAIN_EMOJIS = {
     "study_growth": "📚",
 }
 
+ELEMENT_ORDER = ["metal", "wood", "water", "fire", "earth"]
+
+ELEMENT_UI = {
+    "metal": {
+        "label": "Metal",
+        "hanzi": "金",
+        "full_label": "Metal (金)",
+        "emoji": "⚙️",
+        "meaning": "Metal points toward structure, discernment, boundaries, and precision.",
+        "colors": ["White", "Silver", "Gold"],
+        "examples": [
+            "Wear white, silver, or gold touches in apparel, jewelry, or a watch strap.",
+            "Choose cleaner metallic finishes on everyday objects you use often.",
+            "Lean into tidier, more pared-back visual choices around your desk or room.",
+        ],
+        "accent": "#cbd5e1",
+    },
+    "wood": {
+        "label": "Wood",
+        "hanzi": "木",
+        "full_label": "Wood (木)",
+        "emoji": "🌿",
+        "meaning": "Wood points toward growth, flexibility, planning, and steady upward movement.",
+        "colors": ["Green", "Olive", "Teal"],
+        "examples": [
+            "Wear more green tones in shirts, scarves, bags, or small accessories.",
+            "Add plants, natural textures, or wooden finishes to your work area.",
+            "Choose routines that emphasize growth, stretching, and gradual progress.",
+        ],
+        "accent": "#86efac",
+    },
+    "water": {
+        "label": "Water",
+        "hanzi": "水",
+        "full_label": "Water (水)",
+        "emoji": "💧",
+        "meaning": "Water points toward flow, adaptability, reflection, and emotional depth.",
+        "colors": ["Blue", "Navy", "Black"],
+        "examples": [
+            "Wear more blue or darker tones in apparel, shoes, bags, or watch straps.",
+            "Use fluid, darker accents in personal items you see every day.",
+            "Spend more time near water or quieter spaces that help you settle and reflect.",
+        ],
+        "accent": "#7dd3fc",
+    },
+    "fire": {
+        "label": "Fire",
+        "hanzi": "火",
+        "full_label": "Fire (火)",
+        "emoji": "🔥",
+        "meaning": "Fire points toward visibility, warmth, expression, and momentum.",
+        "colors": ["Red", "Coral", "Magenta"],
+        "examples": [
+            "Bring in warmer red or coral accents through apparel or accessories.",
+            "Choose lighting, colors, or decor that make spaces feel brighter and more alive.",
+            "Lean into activities that increase warmth, visibility, and social energy.",
+        ],
+        "accent": "#fb7185",
+    },
+    "earth": {
+        "label": "Earth",
+        "hanzi": "土",
+        "full_label": "Earth (土)",
+        "emoji": "🪨",
+        "meaning": "Earth points toward grounding, support, steadiness, and practical care.",
+        "colors": ["Beige", "Ochre", "Brown"],
+        "examples": [
+            "Use beige, tan, or brown tones in apparel, footwear, or everyday carry items.",
+            "Choose heavier, grounding textures in your home or work environment.",
+            "Favor habits that stabilize the day, such as regular meals or consistent routines.",
+        ],
+        "accent": "#fcd34d",
+    },
+}
+
 SIGNS = [
     "Aries",
     "Taurus",

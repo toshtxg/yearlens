@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+from collections.abc import MutableMapping
 from datetime import date, timedelta
 from functools import lru_cache
 from html import escape
@@ -13,7 +14,7 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from app.core.config import DOMAINS, DOMAIN_EMOJIS, DOMAIN_LABELS, TONE_COLORS, TONE_UI
+from app.core.config import DOMAINS, DOMAIN_EMOJIS, DOMAIN_LABELS, ELEMENT_ORDER, TONE_COLORS, TONE_UI
 from app.core.input_schema import UserInput
 from app.core.trend_engine import build_lifetime_domain_trends, build_multi_year_domain_trends
 
@@ -153,6 +154,103 @@ def _render_domain_emphasis(overview: dict) -> None:
             "</div>"
         ),
         unsafe_allow_html=True,
+    )
+
+
+def _render_bazi_profile(bazi_profile: dict) -> None:
+    if not bazi_profile:
+        return
+
+    pillars = "".join(_build_bazi_pillar_card(pillar) for pillar in bazi_profile["pillars"])
+    st.markdown(
+        (
+            "<div class='yearlens-bazi-block'>"
+            "<div class='yearlens-section-title yearlens-section-title-inline'>☯️ Birth Element Balance</div>"
+            "<div class='yearlens-bazi-copy'>"
+            "This section reads your birth-only BaZi element mix from your birth date, time, and timezone. "
+            "It does not change with the selected year."
+            "</div>"
+            f"<div class='yearlens-bazi-pillar-grid'>{pillars}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    element_rows = sorted(bazi_profile["elements"], key=lambda item: ELEMENT_ORDER.index(item["key"]))
+    element_cards = "".join(_build_bazi_element_card(item) for item in element_rows)
+    st.markdown(
+        (
+            "<div class='yearlens-bazi-block'>"
+            "<div class='yearlens-section-title yearlens-section-title-inline'>🧭 Five-element decomposition</div>"
+            f"<div class='yearlens-bazi-element-grid'>{element_cards}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+    recommendation = bazi_profile["recommendations"]
+    if recommendation["mode"] == "skip":
+        st.caption(recommendation["copy"])
+        return
+
+    recommendation_blocks = "".join(_build_bazi_recommendation_block(item) for item in recommendation["items"])
+    st.markdown(
+        (
+            "<div class='yearlens-bazi-block yearlens-bazi-recommendation-shell'>"
+            f"<div class='yearlens-section-title yearlens-section-title-inline'>🎨 {escape(recommendation['title'])}</div>"
+            f"<div class='yearlens-bazi-copy'>{escape(recommendation['copy'])}</div>"
+            f"<div class='yearlens-bazi-recommendation-grid'>{recommendation_blocks}</div>"
+            f"<div class='yearlens-bazi-footnote'>{escape(recommendation['disclaimer'])}</div>"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
+
+
+def _build_bazi_pillar_card(pillar: dict) -> str:
+    stem_label = pillar["stem_element"].title()
+    branch_label = pillar["branch_element"].title()
+    return (
+        "<div class='yearlens-bazi-pillar-card'>"
+        f"<div class='yearlens-bazi-pillar-kicker'>{escape(pillar['label'])} Pillar</div>"
+        f"<div class='yearlens-bazi-pillar-main'>{escape(pillar['characters'])}</div>"
+        f"<div class='yearlens-bazi-pillar-copy'>Stem {escape(stem_label)} · Branch {escape(branch_label)}</div>"
+        "</div>"
+    )
+
+
+def _build_bazi_element_card(item: dict) -> str:
+    return (
+        f"<div class='yearlens-bazi-element-card' style='--yl-element-accent:{item['accent']};'>"
+        "<div class='yearlens-bazi-element-head'>"
+        f"<span>{escape(item['emoji'])} {escape(item['full_label'])}</span>"
+        f"<span>{item['count']}/8</span>"
+        "</div>"
+        f"<div class='yearlens-bazi-element-percent'>{item['percentage']:.1f}%</div>"
+        f"<div class='yearlens-bazi-element-meaning'>{escape(item['meaning'])}</div>"
+        f"<div class='yearlens-bazi-state yearlens-bazi-state-{escape(item['state'])}'>{escape(item['state_label'])}</div>"
+        "</div>"
+    )
+
+
+def _build_bazi_recommendation_block(item: dict) -> str:
+    color_pills = "".join(
+        (
+            f"<span class='yearlens-bazi-color-pill' style='--yl-element-accent:{item['accent']};'>"
+            f"{escape(color)}"
+            "</span>"
+        )
+        for color in item["colors"]
+    )
+    examples = "".join(f"<li>{escape(example)}</li>" for example in item["examples"])
+    return (
+        f"<div class='yearlens-bazi-recommendation-card' style='--yl-element-accent:{item['accent']};'>"
+        f"<div class='yearlens-bazi-recommendation-title'>{escape(item['emoji'])} {escape(item['full_label'])}</div>"
+        "<div class='yearlens-bazi-recommendation-kicker'>Colors to lean on</div>"
+        f"<div class='yearlens-bazi-color-row'>{color_pills}</div>"
+        "<div class='yearlens-bazi-recommendation-kicker'>Grounded examples</div>"
+        f"<ul class='yearlens-mini-list'>{examples}</ul>"
+        "</div>"
     )
 
 
@@ -296,11 +394,15 @@ def _default_long_range_metric_label() -> str:
     return "Average"
 
 
+def _elements_reveal_key() -> str:
+    return "yearlens_elements_visible_v1"
+
+
 def _trend_reveal_key() -> str:
     return "yearlens_trends_visible_v2"
 
 
-def _trend_report_key(metadata: dict) -> str:
+def _report_identity_key(metadata: dict) -> str:
     input_snapshot = metadata["input_snapshot"]
     return "|".join(
         [
@@ -313,6 +415,25 @@ def _trend_report_key(metadata: dict) -> str:
             str(metadata.get("window_end", "")),
         ]
     )
+
+
+def _trend_report_key(metadata: dict) -> str:
+    return _report_identity_key(metadata)
+
+
+def _sync_report_toggle_state(state: MutableMapping[str, object], reveal_key: str, metadata: dict) -> None:
+    report_key = _report_identity_key(metadata)
+    report_state_key = f"{reveal_key}_report"
+    if state.get(report_state_key) != report_key:
+        state[reveal_key] = False
+        state[report_state_key] = report_key
+    elif reveal_key not in state:
+        state[reveal_key] = False
+
+
+def _reveal_button_label(icon: str, label: str, is_visible: bool) -> str:
+    action = "hide" if is_visible else "open"
+    return f"{icon} Click / Tap to {action} {label}"
 
 
 def _long_range_note_title(scope: str) -> str:
@@ -857,6 +978,8 @@ def _render_segment_label(start_value: str, end_value: str, size_class: str) -> 
 def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) -> None:
     anchor_label = "Birthday cycle" if metadata["year_anchor"] == "birthday" else "Calendar year"
     window_text = _format_window_text(metadata["window_start"], metadata["window_end"])
+    elements_key = _elements_reveal_key()
+    trend_key = _trend_reveal_key()
 
     st.markdown(
         f"""
@@ -877,20 +1000,23 @@ def render_year_overview(overview: dict, metadata: dict, periods: list[dict]) ->
 
     _render_tone_summary_chips(overview["tone_summary"])
     _render_domain_emphasis(overview)
-    reveal_key = _trend_reveal_key()
-    report_key = _trend_report_key(metadata)
-    report_state_key = f"{reveal_key}_report"
-    if st.session_state.get(report_state_key) != report_key:
-        st.session_state[reveal_key] = False
-        st.session_state[report_state_key] = report_key
-    elif reveal_key not in st.session_state:
-        st.session_state[reveal_key] = False
+    _sync_report_toggle_state(st.session_state, elements_key, metadata)
+    _sync_report_toggle_state(st.session_state, trend_key, metadata)
 
-    button_label = "📈 Click / Tap to open Trends" if not st.session_state[reveal_key] else "📈 Click / Tap to hide Trends"
-    if st.button(button_label, key="yearlens_trend_reveal_button", type="secondary"):
-        st.session_state[reveal_key] = not st.session_state[reveal_key]
+    button_col1, button_col2 = st.columns(2, gap="small")
+    with button_col1:
+        element_button_label = _reveal_button_label("☯️", "Birth Element Balance", bool(st.session_state[elements_key]))
+        if st.button(element_button_label, key="yearlens_element_reveal_button", type="secondary", width="stretch"):
+            st.session_state[elements_key] = not bool(st.session_state[elements_key])
+    with button_col2:
+        trend_button_label = _reveal_button_label("📈", "Trends", bool(st.session_state[trend_key]))
+        if st.button(trend_button_label, key="yearlens_trend_reveal_button", type="secondary", width="stretch"):
+            st.session_state[trend_key] = not bool(st.session_state[trend_key])
 
-    if st.session_state[reveal_key]:
+    if st.session_state[elements_key]:
+        _render_bazi_profile(metadata.get("bazi_profile", {}))
+
+    if st.session_state[trend_key]:
         selected_domain = _render_domain_trend_chart(periods, overview)
         _render_multi_year_domain_trend_chart(metadata, selected_domain)
 

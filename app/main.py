@@ -10,6 +10,7 @@ import streamlit as st
 from pydantic import ValidationError
 
 from app.core.astro_engine import build_natal_chart, build_year_change_points, get_year_window
+from app.core.bazi_engine import build_bazi_profile
 from app.core.input_schema import UserInput
 from app.core.meaning_engine import build_period_meanings
 from app.core.narrative_engine import attach_narratives, build_year_overview
@@ -24,6 +25,7 @@ from app.ui.timeline import render_period_timeline
 def generate_report(user_input: UserInput) -> dict:
     window_start, window_end = get_year_window(user_input)
     natal_chart = build_natal_chart(user_input)
+    bazi_profile = build_bazi_profile(user_input)
     change_points = build_year_change_points(user_input, natal_chart, window_start, window_end)
     periods = build_periods(window_start, window_end, change_points)
     structured_periods = build_period_meanings(periods, natal_chart)
@@ -40,6 +42,7 @@ def generate_report(user_input: UserInput) -> dict:
             "window_start": window_start.isoformat(),
             "window_end": window_end.isoformat(),
             "natal_chart": natal_chart,
+            "bazi_profile": bazi_profile,
             "change_points": [item.to_dict() for item in change_points],
         },
     }

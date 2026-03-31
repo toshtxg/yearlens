@@ -5,6 +5,7 @@
 - Python 3.13
 - Streamlit
 - `pysweph` / Swiss Ephemeris wrapper
+- `lunar-python`
 - `geopy`
 - `timezonefinder`
 - `pydantic`
@@ -45,6 +46,8 @@ Why this shape:
   Geocoding, coordinate normalization, timezone lookup.
 - [astro_engine.py](/Users/toshgoh/projects/yearlens/app/core/astro_engine.py)
   Natal chart computation, reading window logic, yearly change points.
+- [bazi_engine.py](/Users/toshgoh/projects/yearlens/app/core/bazi_engine.py)
+  Exact BaZi pillar calculation plus visible five-element decomposition and lightweight balancing suggestions.
 - [period_engine.py](/Users/toshgoh/projects/yearlens/app/core/period_engine.py)
   Boundary merging, splitting, and segment compression.
 - [meaning_engine.py](/Users/toshgoh/projects/yearlens/app/core/meaning_engine.py)
@@ -81,11 +84,12 @@ Important current-state note:
 1. Streamlit form collects input.
 2. `UserInput` validates the payload.
 3. `location_service` resolves location context.
-4. `astro_engine` computes natal chart and yearly change points.
-5. `period_engine` converts event dates into readable periods.
-6. `meaning_engine` selects dominant drivers, scores domains, creates soft guidance signals, and builds explanation blocks plus confidence breakdowns.
-7. `template_narrative` converts structured period data into headline and summary copy.
-8. UI renders overview plus timeline.
+4. `astro_engine` computes the sidereal natal chart and yearly change points.
+5. `bazi_engine` computes the exact BaZi four pillars from the local birth datetime and derives the visible five-element mix.
+6. `period_engine` converts event dates into readable periods.
+7. `meaning_engine` selects dominant drivers, scores domains, creates soft guidance signals, and builds explanation blocks plus confidence breakdowns.
+8. `template_narrative` converts structured period data into headline and summary copy.
+9. UI renders the overview, optional BaZi balance section, and the year timeline.
 
 ## Ephemeris Behavior
 
@@ -114,6 +118,7 @@ Privacy implication:
 
 - if the text location path is used, the place name is sent to the geocoder to resolve coordinates
 - timezone lookup is then performed locally from the resolved coordinates
+- the same resolved local timezone is reused for both sidereal chart math and BaZi pillar calculation
 
 ## Deployment Notes
 
@@ -147,6 +152,7 @@ Current test coverage focuses on:
 
 - schema validation
 - astrology engine wiring
+- BaZi pillar and element-balance regression cases
 - period generation
 - meaning-engine output shape and signal surfacing
 - narrative output shape
@@ -166,6 +172,7 @@ pytest app/tests
 - no OCR ingestion
 - no historical note calibration
 - no explicit birth-time uncertainty modeling
+- BaZi balancing guidance is intentionally heuristic and limited to visible pillars plus lightweight color cues
 - heuristic interpretation rules still need refinement
 
 ## Recommended Next Technical Steps
